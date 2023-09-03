@@ -46,6 +46,32 @@ func main() {
 
 https://go.dev/play/p/Ql3CM7NLfj0
 
+Please refer to the numerous usage examples on [GoDoc](https://pkg.go.dev/github.com/Code-Hex/synchro/) for reference.
+
+## Utilities
+
+We also have a wide range of very useful utilities!!
+
+If you have a feature request, please open an issue. It would be great if you could provide relevant examples or links that could be helpful.
+
+- [In](https://pkg.go.dev/github.com/Code-Hex/synchro#In)
+- [ConvertTz](https://pkg.go.dev/github.com/Code-Hex/synchro#ConvertTz)
+- [NowContext](https://pkg.go.dev/github.com/Code-Hex/synchro#NowContext)
+- [Quarter](https://pkg.go.dev/github.com/Code-Hex/synchro#Quarter)
+- [Semester](https://pkg.go.dev/github.com/Code-Hex/synchro#Semester)
+- [StartOfMonth](https://pkg.go.dev/github.com/Code-Hex/synchro#Time.StartOfMonth)
+- [EndOfMonth](https://pkg.go.dev/github.com/Code-Hex/synchro#Time.EndOfMonth)
+- [StartOfQuarter](https://pkg.go.dev/github.com/Code-Hex/synchro#Time.StartOfQuarter)
+- [EndOfQuarter](https://pkg.go.dev/github.com/Code-Hex/synchro#Time.EndOfQuarter)
+- [StartOfSemester](https://pkg.go.dev/github.com/Code-Hex/synchro#Time.StartOfSemester)
+- [EndOfSemester](https://pkg.go.dev/github.com/Code-Hex/synchro#Time.EndOfSemester)
+- [StartOfWeek](https://pkg.go.dev/github.com/Code-Hex/synchro#Time.StartOfWeek)
+- [EndOfWeek](https://pkg.go.dev/github.com/Code-Hex/synchro#Time.EndOfWeek)
+- [StartOfYear](https://pkg.go.dev/github.com/Code-Hex/synchro#Time.StartOfYear)
+- [EndOfYear](https://pkg.go.dev/github.com/Code-Hex/synchro#Time.EndOfYear)
+- [IsBetween](https://pkg.go.dev/github.com/Code-Hex/synchro#Time.IsBetween)
+- [IsLeapYear](https://pkg.go.dev/github.com/Code-Hex/synchro#Time.IsLeapYear)
+
 ## Contributing
 
 Contributions to Synchro are welcome!
