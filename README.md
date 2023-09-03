@@ -71,6 +71,7 @@ If you have a feature request, please open an issue. It would be great if you co
 - [EndOfYear](https://pkg.go.dev/github.com/Code-Hex/synchro#Time.EndOfYear)
 - [IsBetween](https://pkg.go.dev/github.com/Code-Hex/synchro#Time.IsBetween)
 - [IsLeapYear](https://pkg.go.dev/github.com/Code-Hex/synchro#Time.IsLeapYear)
+- [DiffInCalendarDays](https://pkg.go.dev/github.com/Code-Hex/synchro#Time.DiffInCalendarDays)
 
 
 ## TODO

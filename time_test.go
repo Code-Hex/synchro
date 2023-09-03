@@ -2,6 +2,7 @@ package synchro_test
 
 import (
 	"fmt"
+	"strconv"
 	"testing"
 	"time"
 
@@ -574,5 +575,42 @@ func TestTime_IsBetween(t *testing.T) {
 		if got != tc.want {
 			t.Errorf("for %q, want %v but got %v", tc.time, tc.want, got)
 		}
+	}
+}
+
+func TestDiffInCalendarDays(t *testing.T) {
+	cases := []struct {
+		t    synchro.Time[tz.UTC]
+		u    synchro.Time[tz.UTC]
+		want int
+	}{
+		{
+			t:    synchro.New[tz.UTC](2011, 6, 2, 0, 0, 0, 0),
+			u:    synchro.New[tz.UTC](2011, 6, 2, 23, 59, 0, 0),
+			want: 0,
+		},
+		{
+			t:    synchro.New[tz.UTC](2011, 6, 2, 0, 0, 0, 0),
+			u:    synchro.New[tz.UTC](2011, 6, 3, 23, 59, 0, 0),
+			want: -1,
+		},
+		{
+			t:    synchro.New[tz.UTC](2012, 6, 2, 0, 0, 0, 0),
+			u:    synchro.New[tz.UTC](2011, 6, 2, 0, 0, 0, 0),
+			want: 366,
+		},
+		{
+			t:    synchro.New[tz.UTC](2023, 8, 16, 0, 0, 0, 0),
+			u:    synchro.New[tz.UTC](2024, 8, 16, 0, 0, 0, 0), // leap year
+			want: -366,
+		},
+	}
+	for i, tc := range cases {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			got := tc.t.DiffInCalendarDays(tc.u)
+			if tc.want != got {
+				t.Fatalf("want %d but got %d", tc.want, got)
+			}
+		})
 	}
 }

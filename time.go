@@ -1,6 +1,7 @@
 package synchro
 
 import (
+	"math"
 	"time"
 )
 
@@ -95,4 +96,14 @@ func (t Time[T]) IsLeapYear() bool {
 // IsBetween returns true if from < t && t < to.
 func (t Time[T]) IsBetween(from Time[T], to Time[T]) bool {
 	return from.Before(t) && to.After(t)
+}
+
+// DiffInCalendarDays calculates the difference in calendar days between t and u. (t-u)
+// Calendar days are calculated by considering only the dates, excluding the times,
+// and then determining the difference in days.
+func (t Time[T]) DiffInCalendarDays(u Time[T]) int {
+	const day = 24 * time.Hour
+	t1 := t.Truncate(day)
+	u1 := u.Truncate(day)
+	return int(math.Ceil(float64(t1.Sub(u1)) / float64(day)))
 }
