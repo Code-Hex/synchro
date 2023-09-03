@@ -16,7 +16,7 @@ func In[T TimeZone](tm time.Time) Time[T] {
 		return Time[T]{}
 	}
 	var tz T
-	return Time[T]{tm.In(tz.Location())}
+	return Time[T]{tm: tm.In(tz.Location())}
 }
 
 // Now returns the current time with timezone.
@@ -73,7 +73,7 @@ func NowWithContext[T TimeZone](ctx context.Context, t Time[T]) context.Context 
 func New[T TimeZone](year int, month time.Month, day int, hour int, min int, sec int, nsec int) Time[T] {
 	var tz T
 	tm := time.Date(year, month, day, hour, min, sec, nsec, tz.Location())
-	return Time[T]{tm}
+	return Time[T]{tm: tm}
 }
 
 // Parse parses a formatted string and returns the time value it represents.
@@ -88,7 +88,7 @@ func Parse[T TimeZone](layout, value string) (Time[T], error) {
 	if err != nil {
 		return Time[T]{}, err
 	}
-	return Time[T]{tm}, nil
+	return Time[T]{tm: tm}, nil
 }
 
 // Unix returns the local Time corresponding to the given Unix time,

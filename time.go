@@ -4,8 +4,11 @@ import (
 	"time"
 )
 
+type empty[T TimeZone] struct{}
+
 type Time[T TimeZone] struct {
 	tm time.Time
+	_  empty[T]
 }
 
 // StdTime returns the time.Time.
