@@ -72,6 +72,13 @@ If you have a feature request, please open an issue. It would be great if you co
 - [IsBetween](https://pkg.go.dev/github.com/Code-Hex/synchro#Time.IsBetween)
 - [IsLeapYear](https://pkg.go.dev/github.com/Code-Hex/synchro#Time.IsLeapYear)
 
+
+## TODO
+
+- [ ] Support database/sql
+- [ ] Support i18n
+- [ ] Optimization
+
 ## Contributing
 
 Contributions to Synchro are welcome!
