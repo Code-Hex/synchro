@@ -28,7 +28,7 @@ jobs:
       - name: Declare some variables
         id: vars
         run: |
-          echo "::set-output name=coverage_txt::${RUNNER_TEMP}/coverage.txt"
+          echo "coverage_txt=${RUNNER_TEMP}/coverage.txt" >> "$GITHUB_OUTPUT"
       - name: Test Coverage (pkg)
         run: go test ./... -race -coverprofile=${{ steps.vars.outputs.coverage_txt }}
       - name: Upload coverage
