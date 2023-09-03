@@ -75,7 +75,7 @@ If you have a feature request, please open an issue. It would be great if you co
 
 ## TODO
 
-- [ ] Support database/sql
+- [x] Support database/sql
 - [ ] Support i18n
 - [ ] Optimization
 
