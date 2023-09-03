@@ -1,5 +1,7 @@
 # Synchro: Timezone-typesafe date and time library for Go
 
+[![Go Reference](https://pkg.go.dev/badge/github.com/Code-Hex/synchro/.svg)](https://pkg.go.dev/github.com/Code-Hex/synchro/)
+
 This library is inspired by Rust [chrono](https://github.com/chronotope/chrono)
 
 ## Features
