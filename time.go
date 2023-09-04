@@ -22,7 +22,7 @@ func (t Time[T]) StartOfYear() Time[T] {
 	return New[T](t.Year(), 1, 1, 0, 0, 0, 0)
 }
 
-// EndOfYear returns Time for start of the year.
+// EndOfYear returns Time for end of the year.
 func (t Time[T]) EndOfYear() Time[T] {
 	return New[T](t.Year(), 12, 31, 23, 59, 59, 999999999)
 }
@@ -77,7 +77,7 @@ func (t Time[T]) StartOfSemester() Time[T] {
 	return New[T](year, month, day, 0, 0, 0, 0)
 }
 
-// StartOfSemester returns a Time for end of the semester.
+// EndOfSemester returns a Time for end of the semester.
 func (t Time[T]) EndOfSemester() Time[T] {
 	year, semester := t.Year(), numberOfSemester(t.Month())
 	month, day := time.June, 30
