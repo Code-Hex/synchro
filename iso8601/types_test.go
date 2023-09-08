@@ -2461,3 +2461,16 @@ func TestOrdinalDate_Validate(t *testing.T) {
 		})
 	}
 }
+
+func TestDate_Date(t *testing.T) {
+	want := Date{
+		Year:  2020,
+		Month: 10,
+		Day:   1,
+	}
+	got := want.Date()
+
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("(-want, +got)\n%s", diff)
+	}
+}
