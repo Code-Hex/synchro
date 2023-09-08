@@ -14,7 +14,7 @@ import (
  *  123045,123456789   12:30:45,123456789
  */
 func ParseTime(b []byte) (Time, error) {
-	if len(b) > 3 && b[2] == ':' {
+	if len(b) > 2 && b[2] == ':' {
 		return parseExtendedTime(b)
 	}
 	return parseBasicTime(b)
@@ -80,6 +80,13 @@ func parseExtendedTime(b []byte) (Time, error) {
 	return hmsfTime(h, m, s, f)
 }
 
+/*
+ *  hh
+ *  hhmm
+ *  hhmmss
+ *  hhmmss.fffffffff
+ *  hhmmss,fffffffff
+ */
 func parseBasicTime(b []byte) (Time, error) {
 	var (
 		h int

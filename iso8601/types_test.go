@@ -2489,14 +2489,206 @@ func TestTimeRangeError_Error(t *testing.T) {
 				Min:     0,
 				Max:     24,
 			},
-			want: "iso8601: 25 hour is not in range 0-24",
+			want: "iso8601 time: 25 hour is not in range 0-24",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := tt.err.Error(); got != tt.want {
-				t.Errorf("DateLikeRangeError.Error() = %v, want %v", got, tt.want)
+				t.Errorf("TimeRangeError.Error() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestTimeZoneRangeError_Error(t *testing.T) {
+	tests := []struct {
+		name string
+		err  *TimeZoneRangeError
+		want string
+	}{
+		{
+			name: "valid error",
+			err: &TimeZoneRangeError{
+				Element: "hour",
+				Value:   24,
+				Min:     0,
+				Max:     23,
+			},
+			want: "iso8601 time zone: 24 hour is not in range 0-23",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.err.Error(); got != tt.want {
+				t.Errorf("TimeZoneRangeError.Error() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestZone_Offset(t *testing.T) {
+	tests := []struct {
+		name string
+		z    Zone
+		want int
+	}{
+		{
+			name: "Asia/Kabul",
+			z: Zone{
+				Hour:   4,
+				Minute: 30,
+				Second: 0,
+			},
+			want: 16200,
+		},
+		{
+			name: "Pacific/Marquesas",
+			z: Zone{
+				Hour:   9,
+				Minute: 30,
+				Second: 0,
+				Minus:  true,
+			},
+			want: -34200,
+		},
+		{
+			name: "Asia/Tokyo",
+			z: Zone{
+				Hour:   9,
+				Minute: 0,
+				Second: 0,
+			},
+			want: 32400,
+		},
+		{
+			name: "with second",
+			z: Zone{
+				Hour:   13,
+				Minute: 10,
+				Second: 30,
+				Minus:  true,
+			},
+			want: -47430,
+		},
+		{
+			name: "+99:99:99",
+			z: Zone{
+				Hour:   99,
+				Minute: 99,
+				Second: 99,
+			},
+			want: 362439,
+		},
+		{
+			name: "-99:99:99",
+			z: Zone{
+				Hour:   99,
+				Minute: 99,
+				Second: 99,
+				Minus:  true,
+			},
+			want: -362439,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.z.Offset(); got != tt.want {
+				t.Errorf("Zone.Offset() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestZone_Validate(t *testing.T) {
+	tests := []struct {
+		name string
+		z    Zone
+		want error
+	}{
+		{
+			name: "invalid hour more than 99",
+			z: Zone{
+				Hour: 100,
+			},
+			want: &TimeZoneRangeError{
+				Element: "hour",
+				Value:   100,
+				Min:     0,
+				Max:     99,
+			},
+		},
+		{
+			name: "invalid hour less than 0",
+			z: Zone{
+				Hour: -1,
+			},
+			want: &TimeZoneRangeError{
+				Element: "hour",
+				Value:   -1,
+				Min:     0,
+				Max:     99,
+			},
+		},
+		{
+			name: "invalid minute more than 99",
+			z: Zone{
+				Minute: 100,
+			},
+			want: &TimeZoneRangeError{
+				Element: "minute",
+				Value:   100,
+				Min:     0,
+				Max:     99,
+			},
+		},
+		{
+			name: "invalid minute less than 0",
+			z: Zone{
+				Minute: -1,
+			},
+			want: &TimeZoneRangeError{
+				Element: "minute",
+				Value:   -1,
+				Min:     0,
+				Max:     99,
+			},
+		},
+		{
+			name: "invalid second more than 99",
+			z: Zone{
+				Second: 100,
+			},
+			want: &TimeZoneRangeError{
+				Element: "second",
+				Value:   100,
+				Min:     0,
+				Max:     99,
+			},
+		},
+		{
+			name: "invalid second less than 0",
+			z: Zone{
+				Second: -1,
+			},
+			want: &TimeZoneRangeError{
+				Element: "second",
+				Value:   -1,
+				Min:     0,
+				Max:     99,
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := tt.z.Validate()
+			if err == nil {
+				t.Fatal("expected error")
+			}
+			if diff := cmp.Diff(tt.want, err); diff != "" {
+				t.Errorf("(-want, +got)\n%s", diff)
 			}
 		})
 	}

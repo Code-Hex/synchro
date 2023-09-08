@@ -246,7 +246,7 @@ type Time struct {
 }
 
 func (t Time) Validate() error {
-	if t.Minute > 59 {
+	if t.Minute < 0 || t.Minute > 59 {
 		return &TimeRangeError{
 			Element: "minute",
 			Value:   t.Minute,
@@ -254,7 +254,7 @@ func (t Time) Validate() error {
 			Max:     59,
 		}
 	}
-	if t.Second > 59 {
+	if t.Second < 0 || t.Second > 59 {
 		return &TimeRangeError{
 			Element: "second",
 			Value:   t.Second,
@@ -262,7 +262,7 @@ func (t Time) Validate() error {
 			Max:     59,
 		}
 	}
-	if t.Hour > 23 {
+	if t.Hour < 0 || t.Hour > 23 {
 		if !(t.Hour == 24 && t.Minute == 0 && t.Second == 0 && t.Nanosecond == 0) {
 			return &TimeRangeError{
 				Element: "hour",
@@ -284,5 +284,60 @@ type TimeRangeError struct {
 }
 
 func (e *TimeRangeError) Error() string {
-	return fmt.Sprintf("iso8601: %d %s is not in range %d-%d", e.Value, e.Element, e.Min, e.Max)
+	return fmt.Sprintf("iso8601 time: %d %s is not in range %d-%d", e.Value, e.Element, e.Min, e.Max)
+}
+
+type Zone struct {
+	Hour   int
+	Minute int
+	Second int
+	Minus  bool
+}
+
+func (z Zone) Validate() error {
+	if z.Minute < 0 || z.Minute > 99 {
+		return &TimeZoneRangeError{
+			Element: "minute",
+			Value:   z.Minute,
+			Min:     0,
+			Max:     99,
+		}
+	}
+	if z.Second < 0 || z.Second > 99 {
+		return &TimeZoneRangeError{
+			Element: "second",
+			Value:   z.Second,
+			Min:     0,
+			Max:     99,
+		}
+	}
+	if z.Hour < 0 || z.Hour > 99 {
+		return &TimeZoneRangeError{
+			Element: "hour",
+			Value:   z.Hour,
+			Min:     0,
+			Max:     99,
+		}
+	}
+	return nil
+}
+
+func (z Zone) Offset() int {
+	sign := 1
+	if z.Minus {
+		sign = -1
+	}
+	return sign * (z.Hour*3600 + z.Minute*60 + z.Second)
+}
+
+// TimeRangeError indicates that a value is not in an expected range for Time.
+type TimeZoneRangeError struct {
+	Element string
+	Value   int
+	Min     int
+	Max     int
+}
+
+func (e *TimeZoneRangeError) Error() string {
+	return fmt.Sprintf("iso8601 time zone: %d %s is not in range %d-%d", e.Value, e.Element, e.Min, e.Max)
 }
