@@ -2474,3 +2474,30 @@ func TestDate_Date(t *testing.T) {
 		t.Errorf("(-want, +got)\n%s", diff)
 	}
 }
+
+func TestTimeRangeError_Error(t *testing.T) {
+	tests := []struct {
+		name string
+		err  *TimeRangeError
+		want string
+	}{
+		{
+			name: "valid error",
+			err: &TimeRangeError{
+				Element: "hour",
+				Value:   25,
+				Min:     0,
+				Max:     24,
+			},
+			want: "iso8601: 25 hour is not in range 0-24",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.err.Error(); got != tt.want {
+				t.Errorf("DateLikeRangeError.Error() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

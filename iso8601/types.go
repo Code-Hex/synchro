@@ -237,3 +237,52 @@ type DateLikeRangeError struct {
 func (e *DateLikeRangeError) Error() string {
 	return fmt.Sprintf("iso8601: %d %s is not in range %d-%d in %d", e.Value, e.Element, e.Min, e.Max, e.Year)
 }
+
+type Time struct {
+	Hour       int
+	Minute     int
+	Second     int
+	Nanosecond int
+}
+
+func (t Time) Validate() error {
+	if t.Minute > 59 {
+		return &TimeRangeError{
+			Element: "minute",
+			Value:   t.Minute,
+			Min:     0,
+			Max:     59,
+		}
+	}
+	if t.Second > 59 {
+		return &TimeRangeError{
+			Element: "second",
+			Value:   t.Second,
+			Min:     0,
+			Max:     59,
+		}
+	}
+	if t.Hour > 23 {
+		if !(t.Hour == 24 && t.Minute == 0 && t.Second == 0 && t.Nanosecond == 0) {
+			return &TimeRangeError{
+				Element: "hour",
+				Value:   t.Hour,
+				Min:     0,
+				Max:     24,
+			}
+		}
+	}
+	return nil
+}
+
+// TimeRangeError indicates that a value is not in an expected range for Time.
+type TimeRangeError struct {
+	Element string
+	Value   int
+	Min     int
+	Max     int
+}
+
+func (e *TimeRangeError) Error() string {
+	return fmt.Sprintf("iso8601: %d %s is not in range %d-%d", e.Value, e.Element, e.Min, e.Max)
+}
