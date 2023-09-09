@@ -17,10 +17,10 @@ func ParseZone(b []byte) (Zone, error) {
  */
 func parseExtendedZone(b []byte) (Zone, error) {
 	var (
-		h     int
-		m     int
-		s     int
-		minus bool
+		h        int
+		m        int
+		s        int
+		negative bool
 	)
 	if len(b) == 0 {
 		return Zone{}, &UnexpectedTokenError{
@@ -43,7 +43,7 @@ func parseExtendedZone(b []byte) (Zone, error) {
 		return timeZone(0, 0, 0, false)
 	case '+':
 	case '-':
-		minus = true
+		negative = true
 	default:
 		return Zone{}, &UnexpectedTokenError{
 			Value:      string(b),
@@ -63,7 +63,7 @@ func parseExtendedZone(b []byte) (Zone, error) {
 
 	h = parseNumber(b, 1, 2)
 	if len(b) < 4 || b[3] != ':' {
-		return timeZone(h, m, s, minus)
+		return timeZone(h, m, s, negative)
 	}
 
 	if c := countDigits(b, 4); c != 2 {
@@ -77,7 +77,7 @@ func parseExtendedZone(b []byte) (Zone, error) {
 
 	m = parseNumber(b, 4, 2)
 	if len(b) < 7 || b[6] != ':' {
-		return timeZone(h, m, s, minus)
+		return timeZone(h, m, s, negative)
 	}
 
 	if c := countDigits(b, 7); c != 2 {
@@ -90,7 +90,7 @@ func parseExtendedZone(b []byte) (Zone, error) {
 	}
 
 	s = parseNumber(b, 7, 2)
-	return timeZone(h, m, s, minus)
+	return timeZone(h, m, s, negative)
 }
 
 /*
@@ -101,10 +101,10 @@ func parseExtendedZone(b []byte) (Zone, error) {
  */
 func parseBasicZone(b []byte) (Zone, error) {
 	var (
-		h     int
-		m     int
-		s     int
-		minus bool
+		h        int
+		m        int
+		s        int
+		negative bool
 	)
 	if len(b) == 0 {
 		return Zone{}, &UnexpectedTokenError{
@@ -127,7 +127,7 @@ func parseBasicZone(b []byte) (Zone, error) {
 		return timeZone(0, 0, 0, false)
 	case '+':
 	case '-':
-		minus = true
+		negative = true
 	default:
 		return Zone{}, &UnexpectedTokenError{
 			Value:      string(b),
@@ -141,16 +141,16 @@ func parseBasicZone(b []byte) (Zone, error) {
 	switch n {
 	case 2: // ±hh
 		h = parseNumber(b, 1, 2)
-		return timeZone(h, m, s, minus)
+		return timeZone(h, m, s, negative)
 	case 4: // ±hhmm
 		h = parseNumber(b, 1, 2)
 		m = parseNumber(b, 3, 2)
-		return timeZone(h, m, s, minus)
+		return timeZone(h, m, s, negative)
 	case 6: // ±hhmmss
 		h = parseNumber(b, 1, 2)
 		m = parseNumber(b, 3, 2)
 		s = parseNumber(b, 5, 2)
-		return timeZone(h, m, s, minus)
+		return timeZone(h, m, s, negative)
 	default:
 		return Zone{}, &UnexpectedTokenError{
 			Value:      string(b),
@@ -168,10 +168,10 @@ func parseBasicZone(b []byte) (Zone, error) {
 
 func timeZone(h, m, s int, minus bool) (Zone, error) {
 	z := Zone{
-		Hour:   h,
-		Minute: m,
-		Second: s,
-		Minus:  minus,
+		Hour:     h,
+		Minute:   m,
+		Second:   s,
+		Negative: minus,
 	}
 	if err := z.Validate(); err != nil {
 		return Zone{}, err

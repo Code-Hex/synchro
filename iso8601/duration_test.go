@@ -30,8 +30,8 @@ func TestParseDuration(t *testing.T) {
 		{
 			name: "-P1Y",
 			want: Duration{
-				Year:  1,
-				Minus: true,
+				Year:     1,
+				Negative: true,
 			},
 		},
 		{
@@ -43,8 +43,8 @@ func TestParseDuration(t *testing.T) {
 		{
 			name: "-P1234567890Y",
 			want: Duration{
-				Year:  1234567890,
-				Minus: true,
+				Year:     1234567890,
+				Negative: true,
 			},
 		},
 		{
@@ -57,9 +57,9 @@ func TestParseDuration(t *testing.T) {
 		{
 			name: "-P1Y2M",
 			want: Duration{
-				Year:  1,
-				Month: time.February,
-				Minus: true,
+				Year:     1,
+				Month:    time.February,
+				Negative: true,
 			},
 		},
 		{
@@ -71,8 +71,8 @@ func TestParseDuration(t *testing.T) {
 		{
 			name: "-P2M",
 			want: Duration{
-				Month: time.February,
-				Minus: true,
+				Month:    time.February,
+				Negative: true,
 			},
 		},
 		{
@@ -84,8 +84,8 @@ func TestParseDuration(t *testing.T) {
 		{
 			name: "-P1234567890M",
 			want: Duration{
-				Month: time.Month(1234567890),
-				Minus: true,
+				Month:    time.Month(1234567890),
+				Negative: true,
 			},
 		},
 		{
@@ -99,10 +99,10 @@ func TestParseDuration(t *testing.T) {
 		{
 			name: "-P1Y2M3W",
 			want: Duration{
-				Year:  1,
-				Month: time.February,
-				Week:  3,
-				Minus: true,
+				Year:     1,
+				Month:    time.February,
+				Week:     3,
+				Negative: true,
 			},
 		},
 		{
@@ -114,8 +114,8 @@ func TestParseDuration(t *testing.T) {
 		{
 			name: "-P3W",
 			want: Duration{
-				Week:  3,
-				Minus: true,
+				Week:     3,
+				Negative: true,
 			},
 		},
 		{
@@ -128,9 +128,9 @@ func TestParseDuration(t *testing.T) {
 		{
 			name: "-P1Y3W",
 			want: Duration{
-				Year:  1,
-				Week:  3,
-				Minus: true,
+				Year:     1,
+				Week:     3,
+				Negative: true,
 			},
 		},
 		{
@@ -143,9 +143,9 @@ func TestParseDuration(t *testing.T) {
 		{
 			name: "-P2M3W",
 			want: Duration{
-				Month: time.February,
-				Week:  3,
-				Minus: true,
+				Month:    time.February,
+				Week:     3,
+				Negative: true,
 			},
 		},
 		{
@@ -157,8 +157,8 @@ func TestParseDuration(t *testing.T) {
 		{
 			name: "-P1234567890W",
 			want: Duration{
-				Week:  1234567890,
-				Minus: true,
+				Week:     1234567890,
+				Negative: true,
 			},
 		},
 		{
@@ -173,11 +173,11 @@ func TestParseDuration(t *testing.T) {
 		{
 			name: "-P1Y2M3W4D",
 			want: Duration{
-				Year:  1,
-				Month: time.February,
-				Week:  3,
-				Day:   4,
-				Minus: true,
+				Year:     1,
+				Month:    time.February,
+				Week:     3,
+				Day:      4,
+				Negative: true,
 			},
 		},
 		{
@@ -189,8 +189,8 @@ func TestParseDuration(t *testing.T) {
 		{
 			name: "-P1234567890D",
 			want: Duration{
-				Day:   1234567890,
-				Minus: true,
+				Day:      1234567890,
+				Negative: true,
 			},
 		},
 		{
@@ -202,8 +202,8 @@ func TestParseDuration(t *testing.T) {
 		{
 			name: "-P4D",
 			want: Duration{
-				Day:   4,
-				Minus: true,
+				Day:      4,
+				Negative: true,
 			},
 		},
 		{
@@ -216,9 +216,9 @@ func TestParseDuration(t *testing.T) {
 		{
 			name: "-P1Y4D",
 			want: Duration{
-				Year:  1,
-				Day:   4,
-				Minus: true,
+				Year:     1,
+				Day:      4,
+				Negative: true,
 			},
 		},
 		{
@@ -231,9 +231,9 @@ func TestParseDuration(t *testing.T) {
 		{
 			name: "-P2M4D",
 			want: Duration{
-				Month: time.February,
-				Day:   4,
-				Minus: true,
+				Month:    time.February,
+				Day:      4,
+				Negative: true,
 			},
 		},
 		{
@@ -246,9 +246,9 @@ func TestParseDuration(t *testing.T) {
 		{
 			name: "-P3W4D",
 			want: Duration{
-				Week:  3,
-				Day:   4,
-				Minus: true,
+				Week:     3,
+				Day:      4,
+				Negative: true,
 			},
 		},
 		{
@@ -261,10 +261,10 @@ func TestParseDuration(t *testing.T) {
 		{
 			name: "-PT2H20M30S",
 			want: Duration{
-				Hour:   2,
-				Minute: 20,
-				Second: 30,
-				Minus:  true,
+				Hour:     2,
+				Minute:   20,
+				Second:   30,
+				Negative: true,
 			},
 		},
 		{
@@ -276,8 +276,8 @@ func TestParseDuration(t *testing.T) {
 		{
 			name: "-PT6M",
 			want: Duration{
-				Minute: 6,
-				Minus:  true,
+				Minute:   6,
+				Negative: true,
 			},
 		},
 		{
@@ -290,9 +290,9 @@ func TestParseDuration(t *testing.T) {
 		{
 			name: "-PT5H6M",
 			want: Duration{
-				Hour:   5,
-				Minute: 6,
-				Minus:  true,
+				Hour:     5,
+				Minute:   6,
+				Negative: true,
 			},
 		},
 		{
@@ -305,9 +305,9 @@ func TestParseDuration(t *testing.T) {
 		{
 			name: "-P3WT6M",
 			want: Duration{
-				Week:   3,
-				Minute: 6,
-				Minus:  true,
+				Week:     3,
+				Minute:   6,
+				Negative: true,
 			},
 		},
 		{
@@ -320,9 +320,9 @@ func TestParseDuration(t *testing.T) {
 		{
 			name: "-P4DT6M",
 			want: Duration{
-				Day:    4,
-				Minute: 6,
-				Minus:  true,
+				Day:      4,
+				Minute:   6,
+				Negative: true,
 			},
 		},
 		{
@@ -334,8 +334,8 @@ func TestParseDuration(t *testing.T) {
 		{
 			name: "-PT7S",
 			want: Duration{
-				Second: 7,
-				Minus:  true,
+				Second:   7,
+				Negative: true,
 			},
 		},
 		{
@@ -348,9 +348,9 @@ func TestParseDuration(t *testing.T) {
 		{
 			name: "-PT5H7S",
 			want: Duration{
-				Hour:   5,
-				Second: 7,
-				Minus:  true,
+				Hour:     5,
+				Second:   7,
+				Negative: true,
 			},
 		},
 		{
@@ -363,9 +363,9 @@ func TestParseDuration(t *testing.T) {
 		{
 			name: "-PT6M7S",
 			want: Duration{
-				Minute: 6,
-				Second: 7,
-				Minus:  true,
+				Minute:   6,
+				Second:   7,
+				Negative: true,
 			},
 		},
 		{
@@ -379,10 +379,10 @@ func TestParseDuration(t *testing.T) {
 		{
 			name: "-PT5H6M7S",
 			want: Duration{
-				Hour:   5,
-				Minute: 6,
-				Second: 7,
-				Minus:  true,
+				Hour:     5,
+				Minute:   6,
+				Second:   7,
+				Negative: true,
 			},
 		},
 		{
@@ -397,11 +397,11 @@ func TestParseDuration(t *testing.T) {
 		{
 			name: "-P1YT5H6M7S",
 			want: Duration{
-				Year:   1,
-				Hour:   5,
-				Minute: 6,
-				Second: 7,
-				Minus:  true,
+				Year:     1,
+				Hour:     5,
+				Minute:   6,
+				Second:   7,
+				Negative: true,
 			},
 		},
 		{
@@ -414,7 +414,7 @@ func TestParseDuration(t *testing.T) {
 			name: "-PT0.008S",
 			want: Duration{
 				Millisecond: 8,
-				Minus:       true,
+				Negative:    true,
 			},
 		},
 		{
@@ -427,7 +427,7 @@ func TestParseDuration(t *testing.T) {
 			name: "-PT0.08S",
 			want: Duration{
 				Millisecond: 80,
-				Minus:       true,
+				Negative:    true,
 			},
 		},
 		{
@@ -440,7 +440,7 @@ func TestParseDuration(t *testing.T) {
 			name: "-PT0.087S",
 			want: Duration{
 				Millisecond: 87,
-				Minus:       true,
+				Negative:    true,
 			},
 		},
 		{
@@ -453,7 +453,7 @@ func TestParseDuration(t *testing.T) {
 			name: "-PT0.876S",
 			want: Duration{
 				Millisecond: 876,
-				Minus:       true,
+				Negative:    true,
 			},
 		},
 		{
@@ -468,7 +468,7 @@ func TestParseDuration(t *testing.T) {
 			want: Duration{
 				Second:      876,
 				Millisecond: 543,
-				Minus:       true,
+				Negative:    true,
 			},
 		},
 		{
@@ -481,7 +481,7 @@ func TestParseDuration(t *testing.T) {
 			name: "-PT0.000009S",
 			want: Duration{
 				Microsecond: 9,
-				Minus:       true,
+				Negative:    true,
 			},
 		},
 		{
@@ -494,7 +494,7 @@ func TestParseDuration(t *testing.T) {
 			name: "-PT0.00009S",
 			want: Duration{
 				Microsecond: 90,
-				Minus:       true,
+				Negative:    true,
 			},
 		},
 		{
@@ -507,7 +507,7 @@ func TestParseDuration(t *testing.T) {
 			name: "-PT0.000098S",
 			want: Duration{
 				Microsecond: 98,
-				Minus:       true,
+				Negative:    true,
 			},
 		},
 		{
@@ -520,7 +520,7 @@ func TestParseDuration(t *testing.T) {
 			name: "-PT0.000987S",
 			want: Duration{
 				Microsecond: 987,
-				Minus:       true,
+				Negative:    true,
 			},
 		},
 		{
@@ -535,7 +535,7 @@ func TestParseDuration(t *testing.T) {
 			want: Duration{
 				Millisecond: 987,
 				Microsecond: 654,
-				Minus:       true,
+				Negative:    true,
 			},
 		},
 		{
@@ -552,7 +552,7 @@ func TestParseDuration(t *testing.T) {
 				Second:      987,
 				Millisecond: 654,
 				Microsecond: 321,
-				Minus:       true,
+				Negative:    true,
 			},
 		},
 		{
@@ -565,7 +565,7 @@ func TestParseDuration(t *testing.T) {
 			name: "-PT0.000000001S",
 			want: Duration{
 				Nanosecond: 1,
-				Minus:      true,
+				Negative:   true,
 			},
 		},
 		{
@@ -578,7 +578,7 @@ func TestParseDuration(t *testing.T) {
 			name: "-PT0.00000001S",
 			want: Duration{
 				Nanosecond: 10,
-				Minus:      true,
+				Negative:   true,
 			},
 		},
 		{
@@ -591,7 +591,7 @@ func TestParseDuration(t *testing.T) {
 			name: "-PT0.000000012S",
 			want: Duration{
 				Nanosecond: 12,
-				Minus:      true,
+				Negative:   true,
 			},
 		},
 		{
@@ -604,7 +604,7 @@ func TestParseDuration(t *testing.T) {
 			name: "-PT0.000000123S",
 			want: Duration{
 				Nanosecond: 123,
-				Minus:      true,
+				Negative:   true,
 			},
 		},
 		{
@@ -619,7 +619,7 @@ func TestParseDuration(t *testing.T) {
 			want: Duration{
 				Microsecond: 123,
 				Nanosecond:  456,
-				Minus:       true,
+				Negative:    true,
 			},
 		},
 		{
@@ -636,7 +636,7 @@ func TestParseDuration(t *testing.T) {
 				Millisecond: 123,
 				Microsecond: 456,
 				Nanosecond:  789,
-				Minus:       true,
+				Negative:    true,
 			},
 		},
 		{
@@ -655,7 +655,7 @@ func TestParseDuration(t *testing.T) {
 				Millisecond: 234,
 				Microsecond: 567,
 				Nanosecond:  891,
-				Minus:       true,
+				Negative:    true,
 			},
 		},
 		{
@@ -674,7 +674,7 @@ func TestParseDuration(t *testing.T) {
 				Millisecond: 3,
 				Microsecond: 2,
 				Nanosecond:  1,
-				Minus:       true,
+				Negative:    true,
 			},
 		},
 		{
@@ -702,7 +702,7 @@ func TestParseDuration(t *testing.T) {
 				Millisecond: 3,
 				Microsecond: 92,
 				Nanosecond:  1,
-				Minus:       true,
+				Negative:    true,
 			},
 		},
 		{
@@ -721,7 +721,7 @@ func TestParseDuration(t *testing.T) {
 				Millisecond: 93,
 				Microsecond: 82,
 				Nanosecond:  1,
-				Minus:       true,
+				Negative:    true,
 			},
 		},
 		{
@@ -752,7 +752,7 @@ func TestParseDuration(t *testing.T) {
 				Millisecond: 8,
 				Microsecond: 9,
 				Nanosecond:  1,
-				Minus:       true,
+				Negative:    true,
 			},
 		},
 		{
@@ -783,7 +783,7 @@ func TestParseDuration(t *testing.T) {
 				Millisecond: 890,
 				Microsecond: 901,
 				Nanosecond:  123,
-				Minus:       true,
+				Negative:    true,
 			},
 		},
 		{
@@ -829,7 +829,7 @@ func TestParseDuration(t *testing.T) {
 				Millisecond: 1,
 				Microsecond: 1,
 				Nanosecond:  1,
-				Minus:       true,
+				Negative:    true,
 			},
 		},
 		{
@@ -894,7 +894,7 @@ func TestParseDuration(t *testing.T) {
 				Minute:      1,
 				Second:      52,
 				Millisecond: 500,
-				Minus:       true,
+				Negative:    true,
 			},
 		},
 		{
@@ -917,7 +917,7 @@ func TestParseDuration(t *testing.T) {
 				Millisecond: 500,
 				Microsecond: 409,
 				Nanosecond:  40,
-				Minus:       true,
+				Negative:    true,
 			},
 		},
 		{

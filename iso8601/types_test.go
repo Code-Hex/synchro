@@ -2547,10 +2547,10 @@ func TestZone_Offset(t *testing.T) {
 		{
 			name: "Pacific/Marquesas",
 			z: Zone{
-				Hour:   9,
-				Minute: 30,
-				Second: 0,
-				Minus:  true,
+				Hour:     9,
+				Minute:   30,
+				Second:   0,
+				Negative: true,
 			},
 			want: -34200,
 		},
@@ -2566,10 +2566,10 @@ func TestZone_Offset(t *testing.T) {
 		{
 			name: "with second",
 			z: Zone{
-				Hour:   13,
-				Minute: 10,
-				Second: 30,
-				Minus:  true,
+				Hour:     13,
+				Minute:   10,
+				Second:   30,
+				Negative: true,
 			},
 			want: -47430,
 		},
@@ -2585,10 +2585,10 @@ func TestZone_Offset(t *testing.T) {
 		{
 			name: "-99:99:99",
 			z: Zone{
-				Hour:   99,
-				Minute: 99,
-				Second: 99,
-				Minus:  true,
+				Hour:     99,
+				Minute:   99,
+				Second:   99,
+				Negative: true,
 			},
 			want: -362439,
 		},

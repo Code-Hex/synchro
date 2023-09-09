@@ -288,10 +288,10 @@ func (e *TimeRangeError) Error() string {
 }
 
 type Zone struct {
-	Hour   int
-	Minute int
-	Second int
-	Minus  bool
+	Hour     int
+	Minute   int
+	Second   int
+	Negative bool
 }
 
 func (z Zone) Validate() error {
@@ -324,7 +324,7 @@ func (z Zone) Validate() error {
 
 func (z Zone) Offset() int {
 	sign := 1
-	if z.Minus {
+	if z.Negative {
 		sign = -1
 	}
 	return sign * (z.Hour*3600 + z.Minute*60 + z.Second)
@@ -353,5 +353,5 @@ type Duration struct {
 	Millisecond int
 	Microsecond int
 	Nanosecond  int
-	Minus       bool
+	Negative    bool
 }

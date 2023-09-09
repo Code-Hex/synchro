@@ -26,7 +26,7 @@ func ParseDuration(b []byte) (Duration, error) {
 		minute            int
 		second            int
 		excessNanoseconds int
-		minus             bool
+		negative          bool
 	)
 
 	if len(b) == 0 {
@@ -42,7 +42,7 @@ func ParseDuration(b []byte) (Duration, error) {
 	switch b[0] {
 	case '+', '-':
 		if b[0] == '-' {
-			minus = true
+			negative = true
 		}
 		if len(b[1:]) == 0 {
 			return Duration{}, &UnexpectedTokenError{
@@ -320,6 +320,6 @@ func ParseDuration(b []byte) (Duration, error) {
 		Millisecond: millisec,
 		Microsecond: microsec,
 		Nanosecond:  nanosec,
-		Minus:       minus,
+		Negative:    negative,
 	}, nil
 }

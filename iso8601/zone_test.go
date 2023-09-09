@@ -30,14 +30,14 @@ func TestParseZone(t *testing.T) {
 		{
 			name: "-00",
 			want: Zone{
-				Minus: true,
+				Negative: true,
 			},
 		},
 		{
 			name: "-23",
 			want: Zone{
-				Hour:  23,
-				Minus: true,
+				Hour:     23,
+				Negative: true,
 			},
 		},
 		{
@@ -57,25 +57,25 @@ func TestParseZone(t *testing.T) {
 		{
 			name: "-2300",
 			want: Zone{
-				Hour:   23,
-				Minute: 0,
-				Minus:  true,
+				Hour:     23,
+				Minute:   0,
+				Negative: true,
 			},
 		},
 		{
 			name: "-0059",
 			want: Zone{
-				Hour:   0,
-				Minute: 59,
-				Minus:  true,
+				Hour:     0,
+				Minute:   59,
+				Negative: true,
 			},
 		},
 		{
 			name: "-0000",
 			want: Zone{
-				Hour:   0,
-				Minute: 0,
-				Minus:  true,
+				Hour:     0,
+				Minute:   0,
+				Negative: true,
 			},
 		},
 		{
@@ -113,37 +113,37 @@ func TestParseZone(t *testing.T) {
 		{
 			name: "-000000",
 			want: Zone{
-				Hour:   0,
-				Minute: 0,
-				Second: 0,
-				Minus:  true,
+				Hour:     0,
+				Minute:   0,
+				Second:   0,
+				Negative: true,
 			},
 		},
 		{
 			name: "-235900",
 			want: Zone{
-				Hour:   23,
-				Minute: 59,
-				Second: 0,
-				Minus:  true,
+				Hour:     23,
+				Minute:   59,
+				Second:   0,
+				Negative: true,
 			},
 		},
 		{
 			name: "-235959",
 			want: Zone{
-				Hour:   23,
-				Minute: 59,
-				Second: 59,
-				Minus:  true,
+				Hour:     23,
+				Minute:   59,
+				Second:   59,
+				Negative: true,
 			},
 		},
 		{
 			name: "-000059",
 			want: Zone{
-				Hour:   0,
-				Minute: 0,
-				Second: 59,
-				Minus:  true,
+				Hour:     0,
+				Minute:   0,
+				Second:   59,
+				Negative: true,
 			},
 		},
 		{
@@ -172,29 +172,29 @@ func TestParseZone(t *testing.T) {
 		{
 			name: "-00:00",
 			want: Zone{
-				Minus: true,
+				Negative: true,
 			},
 		},
 		{
 			name: "-00:59",
 			want: Zone{
-				Minute: 59,
-				Minus:  true,
+				Minute:   59,
+				Negative: true,
 			},
 		},
 		{
 			name: "-23:59",
 			want: Zone{
-				Hour:   23,
-				Minute: 59,
-				Minus:  true,
+				Hour:     23,
+				Minute:   59,
+				Negative: true,
 			},
 		},
 		{
 			name: "-23:00",
 			want: Zone{
-				Hour:  23,
-				Minus: true,
+				Hour:     23,
+				Negative: true,
 			},
 		},
 		{
@@ -241,49 +241,49 @@ func TestParseZone(t *testing.T) {
 		{
 			name: "-00:00:00",
 			want: Zone{
-				Minus: true,
+				Negative: true,
 			},
 		},
 		{
 			name: "-23:00:00",
 			want: Zone{
-				Hour:  23,
-				Minus: true,
+				Hour:     23,
+				Negative: true,
 			},
 		},
 		{
 			name: "-23:59:00",
 			want: Zone{
-				Hour:   23,
-				Minute: 59,
-				Minus:  true,
+				Hour:     23,
+				Minute:   59,
+				Negative: true,
 			},
 		},
 		{
 			name: "-23:59:59",
 			want: Zone{
-				Hour:   23,
-				Minute: 59,
-				Second: 59,
-				Minus:  true,
+				Hour:     23,
+				Minute:   59,
+				Second:   59,
+				Negative: true,
 			},
 		},
 		{
 			name: "-00:59:59",
 			want: Zone{
-				Hour:   0,
-				Minute: 59,
-				Second: 59,
-				Minus:  true,
+				Hour:     0,
+				Minute:   59,
+				Second:   59,
+				Negative: true,
 			},
 		},
 		{
 			name: "-00:00:59",
 			want: Zone{
-				Hour:   0,
-				Minute: 0,
-				Second: 59,
-				Minus:  true,
+				Hour:     0,
+				Minute:   0,
+				Second:   59,
+				Negative: true,
 			},
 		},
 		{
