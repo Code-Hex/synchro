@@ -2,9 +2,13 @@ package iso8601
 
 import (
 	"fmt"
+	"math"
 	"strconv"
 	"time"
 )
+
+// NOTE(codehex): "math.MaxInt == 9223372036854775807" has 19 digits.
+// So I consider the maximum to be 18 digits, which is "999999999999999999."
 
 func countDigits(b []byte, i int) int {
 	start := i
@@ -21,44 +25,9 @@ func parseNumber(b []byte, start, width int) (v int) {
 	if len(b) <= start {
 		return
 	}
-	switch width {
-	case 9:
-		v += int(b[start]-'0') * 100000000
+	for i := width; i > 0; i-- {
+		v += int(b[start]-'0') * int(math.Pow10(i-1))
 		start++
-		fallthrough
-	case 8:
-		v += int(b[start]-'0') * 10000000
-		start++
-		fallthrough
-	case 7:
-		v += int(b[start]-'0') * 1000000
-		start++
-		fallthrough
-	case 6:
-		v += int(b[start]-'0') * 100000
-		start++
-		fallthrough
-	case 5:
-		v += int(b[start]-'0') * 10000
-		start++
-		fallthrough
-	case 4:
-		v += int(b[start]-'0') * 1000
-		start++
-		fallthrough
-	case 3:
-		v += int(b[start]-'0') * 100
-		start++
-		fallthrough
-	case 2:
-		v += int(b[start]-'0') * 10
-		start++
-		fallthrough
-	case 1:
-		v += int(b[start] - '0')
-		start++
-		fallthrough
-	default:
 	}
 	return
 }

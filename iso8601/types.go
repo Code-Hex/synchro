@@ -341,3 +341,17 @@ type TimeZoneRangeError struct {
 func (e *TimeZoneRangeError) Error() string {
 	return fmt.Sprintf("iso8601 time zone: %d %s is not in range %d-%d", e.Value, e.Element, e.Min, e.Max)
 }
+
+type Duration struct {
+	Year        int
+	Month       time.Month
+	Week        int
+	Day         int
+	Hour        int
+	Minute      int
+	Second      int
+	Millisecond int
+	Microsecond int
+	Nanosecond  int
+	Minus       bool
+}
