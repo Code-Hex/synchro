@@ -586,3 +586,35 @@ func TestTimeRangeError_Error(t *testing.T) {
 		})
 	}
 }
+
+func TestTime_String(t *testing.T) {
+	tests := []struct {
+		t    Time
+		want string
+	}{
+		{
+			t: Time{
+				Hour:   12,
+				Minute: 59,
+				Second: 59,
+			},
+			want: "12:59:59.000000000",
+		},
+		{
+			t: Time{
+				Hour:       12,
+				Minute:     59,
+				Second:     59,
+				Nanosecond: 987654321,
+			},
+			want: "12:59:59.987654321",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.want, func(t *testing.T) {
+			if got := tt.t.String(); got != tt.want {
+				t.Errorf("Time.String() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

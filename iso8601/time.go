@@ -15,6 +15,14 @@ type Time struct {
 	Nanosecond int
 }
 
+var _ fmt.Stringer = Time{}
+
+// String returns the ISO8601 string representation of the format "hh:mm:dd".
+// For example: "12:59:59.123456789".
+func (t Time) String() string {
+	return fmt.Sprintf("%02d:%02d:%02d.%09d", t.Hour, t.Minute, t.Second, t.Nanosecond)
+}
+
 // Validate checks the individual components of the time (hour, minute, second, and nanosecond)
 // against their respective valid ISO8601 ranges.
 //
