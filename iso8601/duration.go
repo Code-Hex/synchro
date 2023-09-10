@@ -455,9 +455,7 @@ func (d Duration) IsZero() bool {
 }
 
 // String returns the ISO8601 string representation of the duration.
-// It produces a minimal string without redundant zeros.
-// For example, a duration of one year, two months, three days, four hours, five minutes,
-// six seconds, and seven milliseconds would be "P1Y2M3DT4H5M6.007S".
+// For example: "P1Y2M3DT4H5M6.007S".
 func (d Duration) String() string {
 	var b strings.Builder
 	if d.Negative {

@@ -360,7 +360,16 @@ type Date struct {
 	Day   int
 }
 
-var _ DateLike = Date{}
+var _ interface {
+	DateLike
+	fmt.Stringer
+} = Date{}
+
+// String returns the ISO8601 string representation of the format "YYYY-MM-DD".
+// For example: "2012-12-01".
+func (d Date) String() string {
+	return fmt.Sprintf("%04d-%02d-%02d", d.Year, d.Month, d.Day)
+}
 
 // Date returns itself as it directly represents a date.
 func (d Date) Date() Date {
@@ -419,7 +428,16 @@ type QuarterDate struct {
 	Day     int
 }
 
-var _ DateLike = QuarterDate{}
+var _ interface {
+	DateLike
+	fmt.Stringer
+} = QuarterDate{}
+
+// String returns the ISO8601 string representation of the format "YYYY-QX-DD".
+// For example: "2012-Q4-85".
+func (q QuarterDate) String() string {
+	return fmt.Sprintf("%04d-Q%d-%02d", q.Year, q.Quarter, q.Day)
+}
 
 // Date converts a QuarterDate into the standard Date representation.
 // It calculates the exact calendar date based on the year, quarter, and day within that quarter.
@@ -485,7 +503,16 @@ type WeekDate struct {
 	Day  int
 }
 
-var _ DateLike = WeekDate{}
+var _ interface {
+	DateLike
+	fmt.Stringer
+} = WeekDate{}
+
+// String returns the ISO8601 string representation of the format "YYYY-WX-DD".
+// For example: "2012-W52-1".
+func (w WeekDate) String() string {
+	return fmt.Sprintf("%04d-W%02d-%d", w.Year, w.Week, w.Day)
+}
 
 // Date converts a WeekDate into the standard Date representation.
 // It calculates the exact calendar date based on the year, week number, and day of the week.
@@ -554,7 +581,16 @@ type OrdinalDate struct {
 	Day  int
 }
 
-var _ DateLike = OrdinalDate{}
+var _ interface {
+	DateLike
+	fmt.Stringer
+} = OrdinalDate{}
+
+// String returns the ISO8601 string representation of the format "YYYY-DDD".
+// For example: "2012-359".
+func (o OrdinalDate) String() string {
+	return fmt.Sprintf("%04d-%03d", o.Year, o.Day)
+}
 
 // Date converts an OrdinalDate into the standard Date representation.
 // It calculates the exact calendar date based on the year and the day-of-year.

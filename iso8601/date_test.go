@@ -3067,3 +3067,132 @@ func TestDate_Date(t *testing.T) {
 		t.Errorf("(-want, +got)\n%s", diff)
 	}
 }
+
+func TestDate_String(t *testing.T) {
+	tests := []struct {
+		d    Date
+		want string
+	}{
+		{
+			d: Date{
+				Year:  2012,
+				Month: 1,
+				Day:   1,
+			},
+			want: "2012-01-01",
+		},
+		{
+			d: Date{
+				Year:  2012,
+				Month: 12,
+				Day:   10,
+			},
+			want: "2012-12-10",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.want, func(t *testing.T) {
+			if got := tt.d.String(); got != tt.want {
+				t.Errorf("Date.String() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestQuarterDate_String(t *testing.T) {
+	tests := []struct {
+		q    QuarterDate
+		want string
+	}{
+		{
+			q: QuarterDate{
+				Year:    2012,
+				Quarter: 1,
+				Day:     1,
+			},
+			want: "2012-Q1-01",
+		},
+		{
+			q: QuarterDate{
+				Year:    2012,
+				Quarter: 4,
+				Day:     85,
+			},
+			want: "2012-Q4-85",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.want, func(t *testing.T) {
+			if got := tt.q.String(); got != tt.want {
+				t.Errorf("QuarterDate.String() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestWeekDate_String(t *testing.T) {
+	tests := []struct {
+		w    WeekDate
+		want string
+	}{
+		{
+			w: WeekDate{
+				Year: 2012,
+				Week: 1,
+				Day:  6,
+			},
+			want: "2012-W01-6",
+		},
+		{
+			w: WeekDate{
+				Year: 2012,
+				Week: 52,
+				Day:  1,
+			},
+			want: "2012-W52-1",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.want, func(t *testing.T) {
+			if got := tt.w.String(); got != tt.want {
+				t.Errorf("WeekDate.String() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestOrdinalDate_String(t *testing.T) {
+	tests := []struct {
+		o    OrdinalDate
+		want string
+	}{
+		{
+			o: OrdinalDate{
+				Year: 2012,
+				Day:  1,
+			},
+			want: "2012-001",
+		},
+		{
+			o: OrdinalDate{
+				Year: 2012,
+				Day:  12,
+			},
+			want: "2012-012",
+		},
+		{
+			o: OrdinalDate{
+				Year: 2012,
+				Day:  123,
+			},
+			want: "2012-123",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.want, func(t *testing.T) {
+			if got := tt.o.String(); got != tt.want {
+				t.Errorf("OrdinalDate.String() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
