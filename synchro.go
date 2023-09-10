@@ -3,6 +3,8 @@ package synchro
 import (
 	"context"
 	"time"
+
+	"github.com/Code-Hex/synchro/iso8601"
 )
 
 var nowFunc = time.Now
@@ -89,6 +91,30 @@ func Parse[T TimeZone](layout, value string) (Time[T], error) {
 		return Time[T]{}, err
 	}
 	return Time[T]{tm: tm}, nil
+}
+
+// ParseISO parses an ISO8601-compliant date or datetime string and returns
+// its representation as a Time. If the input string does not conform to the
+// ISO8601 standard or if any other parsing error occurs, an error is returned.
+// Supported formats include:
+//
+//	Basic                        Extended
+//	20070301                     2007-03-01
+//	2012W521                     2012-W52-1
+//	2012Q485                     2012-Q4-85
+//	20070301T1300Z               2007-03-01T13:00Z
+//	20070301T1300Z               2007-03-01T13:00Z
+//	20070301T1300+0100           2007-03-01T13:00+01:00
+//	20070301T1300-0600           2007-03-01T13:00-06:00
+//	20070301T130045Z             2007-03-01T13:00:45Z
+//	20070301T130045+0100         2007-03-01T13:00:45+01:00
+//	... and other combinations
+func ParseISO[T TimeZone](value string) (Time[T], error) {
+	tm, err := iso8601.ParseDateTime[string](value)
+	if err != nil {
+		return Time[T]{}, err
+	}
+	return In[T](tm), nil
 }
 
 // Unix returns the local Time corresponding to the given Unix time,
