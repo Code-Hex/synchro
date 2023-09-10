@@ -5,6 +5,68 @@ import (
 	"math"
 )
 
+// Time represents an ISO8601-compliant time without a date, specified by its hour, minute, second, and nanosecond.
+//
+// Note: The time '24:00:00' is valid and represents midnight at the end of the given day.
+type Time struct {
+	Hour       int
+	Minute     int
+	Second     int
+	Nanosecond int
+}
+
+// Validate checks the individual components of the time (hour, minute, second, and nanosecond)
+// against their respective valid ISO8601 ranges.
+//
+// Specifically, it validates:
+//   - Minute values between 0 and 59 inclusive.
+//   - Second values between 0 and 59 inclusive.
+//   - Hour values between 0 and 23 inclusive, with an exception for the '24:00:00' time.
+//
+// Returns an error if any of the components are out of their expected ranges.
+func (t Time) Validate() error {
+	if t.Minute < 0 || t.Minute > 59 {
+		return &TimeRangeError{
+			Element: "minute",
+			Value:   t.Minute,
+			Min:     0,
+			Max:     59,
+		}
+	}
+	if t.Second < 0 || t.Second > 59 {
+		return &TimeRangeError{
+			Element: "second",
+			Value:   t.Second,
+			Min:     0,
+			Max:     59,
+		}
+	}
+	if t.Hour < 0 || t.Hour > 23 {
+		if !(t.Hour == 24 && t.Minute == 0 && t.Second == 0 && t.Nanosecond == 0) {
+			return &TimeRangeError{
+				Element: "hour",
+				Value:   t.Hour,
+				Min:     0,
+				Max:     24,
+			}
+		}
+	}
+	return nil
+}
+
+// TimeRangeError indicates that a value is not in an expected range for Time.
+type TimeRangeError struct {
+	Element string
+	Value   int
+	Min     int
+	Max     int
+}
+
+// Error implements the error interface.
+func (e *TimeRangeError) Error() string {
+	return fmt.Sprintf("iso8601 time: %d %s is not in range %d-%d", e.Value, e.Element, e.Min, e.Max)
+}
+
 // ParseTime attempts to parse a given byte slice representing a time in
 // various supported ISO 8601 formats. Supported formats include:
 //

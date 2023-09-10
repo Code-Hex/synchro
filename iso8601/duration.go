@@ -3,6 +3,8 @@ package iso8601
 import (
 	"fmt"
 	"math"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -337,4 +339,192 @@ func parseDuration(b []byte) (Duration, error) {
 		Nanosecond:  nanosec,
 		Negative:    negative,
 	}, nil
+}
+
+// Duration represents an ISO8601 duration with the maximum precision of nanoseconds.
+// It includes components like years, months, weeks, days, hours, minutes, seconds,
+// milliseconds, microseconds, and nanoseconds. The Negative field indicates whether
+// the duration is negative.
+type Duration struct {
+	Year        int
+	Month       time.Month
+	Week        int
+	Day         int
+	Hour        int
+	Minute      int
+	Second      int
+	Millisecond int
+	Microsecond int
+	Nanosecond  int
+	Negative    bool
+}
+
+const yearInSecond = 31556952 * time.Second // 365.2425 days * 3600 * 24 seconds
+const monthInSecond = 2630016 * time.Second // 30.44 days * 3600 * 24 seconds
+const weekInSecond = 7 * dayInSecond
+const dayInSecond = 24 * 3600 * time.Second
+
+// StdDuration converts the ISO8601 Duration to a standard Go time.Duration.
+// Note: This conversion is an approximation. The duration of some components
+// like years and months are averaged based on typical values:
+//   - 1 year is considered as 365.2425 days (or 31556952 seconds).
+//   - 1 month is considered as 30.44 days (or 2630016 seconds).
+//   - 1 week is considered as 7 days (or 604800 seconds).
+func (d Duration) StdDuration() time.Duration {
+	duration := time.Duration(d.Year)*yearInSecond +
+		time.Duration(d.Month)*monthInSecond +
+		time.Duration(d.Week)*weekInSecond +
+		time.Duration(d.Day)*dayInSecond +
+		time.Duration(d.Hour)*time.Hour +
+		time.Duration(d.Minute)*time.Minute +
+		time.Duration(d.Second)*time.Second +
+		time.Duration(d.Millisecond)*time.Millisecond +
+		time.Duration(d.Microsecond)*time.Microsecond +
+		time.Duration(d.Nanosecond)
+
+	if d.Negative {
+		duration = -duration
+	}
+	return time.Duration(duration)
+}
+
+// NewDuration makes ISO8601 Duration struct from time.Duration.
+func NewDuration(d time.Duration) Duration {
+	negative := false
+	if d < 0 {
+		negative = true
+		d = -d
+	}
+
+	year := int(d / yearInSecond)
+	d -= time.Duration(year) * yearInSecond
+
+	month := int(d / monthInSecond)
+	d -= time.Duration(month) * monthInSecond
+
+	week := int(d / weekInSecond)
+	d -= time.Duration(week) * weekInSecond
+
+	day := int(d / dayInSecond)
+	d -= time.Duration(day) * dayInSecond
+
+	hour := int(d / time.Hour)
+	d -= time.Duration(hour) * time.Hour
+
+	minute := int(d / time.Minute)
+	d -= time.Duration(minute) * time.Minute
+
+	second := int(d / time.Second)
+	d -= time.Duration(second) * time.Second
+
+	millisecond := int(d / time.Millisecond)
+	d -= time.Duration(millisecond) * time.Millisecond
+
+	microsecond := int(d / time.Microsecond)
+	d -= time.Duration(microsecond) * time.Microsecond
+
+	nanosecond := int(d)
+
+	return Duration{
+		Year:        year,
+		Month:       time.Month(month),
+		Week:        week,
+		Day:         day,
+		Hour:        hour,
+		Minute:      minute,
+		Second:      second,
+		Millisecond: millisecond,
+		Microsecond: microsecond,
+		Nanosecond:  nanosecond,
+		Negative:    negative,
+	}
+}
+
+// Negate changes the sign of the duration.
+func (d Duration) Negate() Duration {
+	src := &d
+	dst := &Duration{}
+	*dst = *src
+	dst.Negative = !dst.Negative
+	return *dst
+}
+
+// IsZero checks duration is zero value.
+func (d Duration) IsZero() bool {
+	return d == Duration{} || d == Duration{Negative: true}
+}
+
+// String returns the ISO8601 string representation of the duration.
+// It produces a minimal string without redundant zeros.
+// For example, a duration of one year, two months, three days, four hours, five minutes,
+// six seconds, and seven milliseconds would be "P1Y2M3DT4H5M6.007S".
+func (d Duration) String() string {
+	var b strings.Builder
+	if d.Negative {
+		b.WriteByte('-')
+	}
+	b.WriteByte('P')
+	if d.IsZero() {
+		b.WriteString("T0S")
+		return b.String()
+	}
+
+	hasTime := false
+	write := func(v int, designator byte, isTime bool) {
+		if !hasTime && isTime {
+			b.WriteByte('T')
+			hasTime = true
+		}
+		b.WriteString(strconv.Itoa(v))
+		b.WriteByte(designator)
+	}
+
+	writeSec := func(v int, fraction int) {
+		if !hasTime && (fraction > 0 || d.Second > 0) {
+			b.WriteByte('T')
+			hasTime = true
+		}
+		if fraction > 0 {
+			b.WriteString(strconv.Itoa(v))
+			b.WriteByte('.')
+			fmt.Fprintf(&b, "%09d", fraction)
+			b.WriteByte('S')
+		} else if d.Second > 0 {
+			b.WriteString(strconv.Itoa(v))
+			b.WriteByte('S')
+		}
+	}
+
+	if d.Year != 0 {
+		write(d.Year, 'Y', false)
+	}
+	if d.Month != 0 {
+		write(int(d.Month), 'M', false)
+	}
+	if d.Week != 0 {
+		write(d.Week, 'W', false)
+	}
+	if d.Day != 0 {
+		write(d.Day, 'D', false)
+	}
+	if d.Hour != 0 {
+		write(d.Hour, 'H', true)
+	}
+	if d.Minute != 0 {
+		write(d.Minute, 'M', true)
+	}
+
+	nanosec := 0
+	if d.Millisecond != 0 {
+		nanosec += d.Millisecond * 1e6
+	}
+	if d.Microsecond != 0 {
+		nanosec += d.Microsecond * 1000
+	}
+	if d.Nanosecond != 0 {
+		nanosec += d.Nanosecond
+	}
+
+	writeSec(d.Second, nanosec)
+	return b.String()
 }

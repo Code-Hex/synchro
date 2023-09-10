@@ -1153,3 +1153,411 @@ func TestParseDuration(t *testing.T) {
 		})
 	}
 }
+
+func TestDuration_StdDuration(t *testing.T) {
+	tests := []struct {
+		name string
+		d    Duration
+		want time.Duration
+	}{
+		{
+			name: "8765h49m12s", // 1 year
+			d: Duration{
+				Year: 1,
+			},
+			want: yearInSecond,
+		},
+		{
+			name: "730h33m36s", // 1 month
+			d: Duration{
+				Month: 1,
+			},
+			want: monthInSecond,
+		},
+		{
+			name: "168h0m0s", // 1 week
+			d: Duration{
+				Week: 1,
+			},
+			want: weekInSecond,
+		},
+		{
+			name: "24h0m0s", // 1 day
+			d: Duration{
+				Day: 1,
+			},
+			want: dayInSecond,
+		},
+		{
+			name: "1h0m0s",
+			d: Duration{
+				Hour: 1,
+			},
+			want: time.Hour,
+		},
+		{
+			name: "1m0s",
+			d: Duration{
+				Minute: 1,
+			},
+			want: time.Minute,
+		},
+		{
+			name: "1s",
+			d: Duration{
+				Second: 1,
+			},
+			want: time.Second,
+		},
+		{
+			name: "1ms",
+			d: Duration{
+				Millisecond: 1,
+			},
+			want: time.Millisecond,
+		},
+		{
+			name: "1µs",
+			d: Duration{
+				Microsecond: 1,
+			},
+			want: time.Microsecond,
+		},
+		{
+			name: "1ns",
+			d: Duration{
+				Nanosecond: 1,
+			},
+			want: time.Nanosecond,
+		},
+		{
+			name: "8765h49m13s", // 1 year + 1 sec
+			d: Duration{
+				Year:   1,
+				Second: 1,
+			},
+			want: yearInSecond + time.Second,
+		},
+		{
+			name: "-730h34m36s", // 1 month + 1 minute
+			d: Duration{
+				Month:    1,
+				Minute:   1,
+				Negative: true,
+			},
+			want: -1 * (monthInSecond + time.Minute),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.d.StdDuration(); got != tt.want {
+				t.Errorf("Duration.StdDuration() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestNewDuration(t *testing.T) {
+	tests := []struct {
+		d    time.Duration
+		want Duration
+	}{
+		{
+			d: yearInSecond,
+			want: Duration{
+				Year: 1,
+			},
+		},
+		{
+			d: monthInSecond,
+			want: Duration{
+				Month: 1,
+			},
+		},
+		{
+			d: weekInSecond,
+			want: Duration{
+				Week: 1,
+			},
+		},
+		{
+			d: dayInSecond,
+			want: Duration{
+				Day: 1,
+			},
+		},
+		{
+			d: time.Hour,
+			want: Duration{
+				Hour: 1,
+			},
+		},
+		{
+			d: time.Minute,
+			want: Duration{
+				Minute: 1,
+			},
+		},
+		{
+			d: time.Second,
+			want: Duration{
+				Second: 1,
+			},
+		},
+		{
+			d: time.Millisecond,
+			want: Duration{
+				Millisecond: 1,
+			},
+		},
+		{
+			d: time.Microsecond,
+			want: Duration{
+				Microsecond: 1,
+			},
+		},
+		{
+			d: time.Nanosecond,
+			want: Duration{
+				Nanosecond: 1,
+			},
+		},
+		{
+			d: yearInSecond + time.Second,
+			want: Duration{
+				Year:   1,
+				Second: 1,
+			},
+		},
+		{
+			d: -1 * (monthInSecond + time.Minute),
+			want: Duration{
+				Month:    1,
+				Minute:   1,
+				Negative: true,
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.d.String(), func(t *testing.T) {
+			got := NewDuration(tt.d)
+			if diff := cmp.Diff(tt.want, got); diff != "" {
+				t.Errorf("(-want, +got)\n%s", diff)
+			}
+		})
+	}
+}
+
+func TestDuration_Negate(t *testing.T) {
+	tests := []struct {
+		d    Duration
+		want Duration
+	}{
+		{
+			d: Duration{
+				Year:        1234,
+				Month:       2345,
+				Week:        3456,
+				Day:         4567,
+				Hour:        5678,
+				Minute:      6789,
+				Second:      7890,
+				Millisecond: 890,
+				Microsecond: 901,
+				Nanosecond:  123,
+			},
+			want: Duration{
+				Year:        1234,
+				Month:       2345,
+				Week:        3456,
+				Day:         4567,
+				Hour:        5678,
+				Minute:      6789,
+				Second:      7890,
+				Millisecond: 890,
+				Microsecond: 901,
+				Nanosecond:  123,
+				Negative:    true,
+			},
+		},
+		{
+			d: Duration{
+				Year:        1234,
+				Month:       2345,
+				Week:        3456,
+				Day:         4567,
+				Hour:        5678,
+				Minute:      6789,
+				Second:      7890,
+				Millisecond: 890,
+				Microsecond: 901,
+				Nanosecond:  123,
+				Negative:    true,
+			},
+			want: Duration{
+				Year:        1234,
+				Month:       2345,
+				Week:        3456,
+				Day:         4567,
+				Hour:        5678,
+				Minute:      6789,
+				Second:      7890,
+				Millisecond: 890,
+				Microsecond: 901,
+				Nanosecond:  123,
+				Negative:    false,
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.d.String(), func(t *testing.T) {
+			got := tt.d.Negate()
+			if diff := cmp.Diff(tt.want, got); diff != "" {
+				t.Errorf("(-want, +got)\n%s", diff)
+			}
+		})
+	}
+}
+
+func TestDuration_String(t *testing.T) {
+	tests := []struct {
+		d    Duration
+		want string
+	}{
+		{
+			d:    Duration{},
+			want: "PT0S",
+		},
+		{
+			d: Duration{
+				Year: 1,
+			},
+			want: "P1Y",
+		},
+		{
+			d: Duration{
+				Month: 1,
+			},
+			want: "P1M",
+		},
+		{
+			d: Duration{
+				Week: 1,
+			},
+			want: "P1W",
+		},
+		{
+			d: Duration{
+				Day: 1,
+			},
+			want: "P1D",
+		},
+		{
+			d: Duration{
+				Hour: 1,
+			},
+			want: "PT1H",
+		},
+		{
+			d: Duration{
+				Minute: 1,
+			},
+			want: "PT1M",
+		},
+		{
+			d: Duration{
+				Second: 1,
+			},
+			want: "PT1S",
+		},
+		{
+			d: Duration{
+				Year:  1,
+				Month: 2,
+				Week:  3,
+				Day:   4,
+			},
+			want: "P1Y2M3W4D",
+		},
+		{
+			d: Duration{
+				Year:     1,
+				Month:    2,
+				Week:     3,
+				Day:      4,
+				Negative: true,
+			},
+			want: "-P1Y2M3W4D",
+		},
+		{
+			d: Duration{
+				Hour:   2,
+				Minute: 20,
+				Second: 30,
+			},
+			want: "PT2H20M30S",
+		},
+		{
+			d: Duration{
+				Hour:     2,
+				Minute:   20,
+				Second:   30,
+				Negative: true,
+			},
+			want: "-PT2H20M30S",
+		},
+		{
+			d: Duration{
+				Year:        1234,
+				Month:       2345,
+				Week:        3456,
+				Day:         4567,
+				Hour:        5678,
+				Minute:      6789,
+				Second:      7890,
+				Millisecond: 890,
+				Microsecond: 901,
+				Nanosecond:  123,
+			},
+			want: "P1234Y2345M3456W4567DT5678H6789M7890.890901123S",
+		},
+		{
+			d: Duration{
+				Year:        1234,
+				Month:       2345,
+				Week:        3456,
+				Day:         4567,
+				Hour:        5678,
+				Minute:      6789,
+				Second:      7890,
+				Millisecond: 890,
+				Microsecond: 901,
+				Nanosecond:  123,
+				Negative:    true,
+			},
+			want: "-P1234Y2345M3456W4567DT5678H6789M7890.890901123S",
+		},
+		{
+			d: Duration{
+				Year:        1,
+				Month:       1,
+				Week:        1,
+				Day:         1,
+				Hour:        1,
+				Minute:      1,
+				Second:      1,
+				Millisecond: 1,
+				Microsecond: 1,
+				Nanosecond:  1,
+			},
+			want: "P1Y1M1W1DT1H1M1.001001001S",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.want, func(t *testing.T) {
+			if got := tt.d.String(); got != tt.want {
+				t.Errorf("Duration.String() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

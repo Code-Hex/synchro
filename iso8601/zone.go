@@ -4,6 +4,76 @@ import (
 	"fmt"
 )
 
+// Zone represents an ISO8601-compliant timezone offset, specified by its hour, minute, and second components.
+// The "Negative" field indicates whether the offset is behind (true) or ahead (false) of Coordinated Universal Time (UTC).
+type Zone struct {
+	Hour     int
+	Minute   int
+	Second   int
+	Negative bool
+}
+
+// Validate checks the individual components of the timezone offset (hour, minute, and second)
+// against their respective valid ISO8601 ranges.
+//
+// Specifically, it validates:
+//   - Minute values between 0 and 99 inclusive.
+//   - Second values between 0 and 99 inclusive.
+//   - Hour values between 0 and 99 inclusive.
+//
+// Returns an error if any of the components are out of their expected ranges.
+func (z Zone) Validate() error {
+	if z.Minute < 0 || z.Minute > 99 {
+		return &TimeZoneRangeError{
+			Element: "minute",
+			Value:   z.Minute,
+			Min:     0,
+			Max:     99,
+		}
+	}
+	if z.Second < 0 || z.Second > 99 {
+		return &TimeZoneRangeError{
+			Element: "second",
+			Value:   z.Second,
+			Min:     0,
+			Max:     99,
+		}
+	}
+	if z.Hour < 0 || z.Hour > 99 {
+		return &TimeZoneRangeError{
+			Element: "hour",
+			Value:   z.Hour,
+			Min:     0,
+			Max:     99,
+		}
+	}
+	return nil
+}
+
+// Offset computes the total time offset in seconds for the Zone.
+// This value is positive if the zone is ahead of UTC, and negative if it's behind.
+// It takes into account the hour, minute, second, and Negative fields.
+func (z Zone) Offset() int {
+	sign := 1
+	if z.Negative {
+		sign = -1
+	}
+	return sign * (z.Hour*3600 + z.Minute*60 + z.Second)
+}
+
+// TimeRangeError indicates that a value is not in an expected range for Time.
+type TimeZoneRangeError struct {
+	Element string
+	Value   int
+	Min     int
+	Max     int
+}
+
+// Error implements the error interface.
+func (e *TimeZoneRangeError) Error() string {
+	return fmt.Sprintf("iso8601 time zone: %d %s is not in range %d-%d", e.Value, e.Element, e.Min, e.Max)
+}
+
 // ParseZone attempts to parse a given byte slice representing a timezone offset
 // in various supported ISO 8601 formats. Supported formats include:
 //
