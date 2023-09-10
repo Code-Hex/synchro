@@ -24,7 +24,11 @@ import (
 // In the absence of a time zone indicator, Parse returns a time in UTC.
 //
 // If parsing fails, an error is returned.
-func ParseDateTime(b []byte) (time.Time, error) {
+func ParseDateTime[bytes []byte | ~string](b bytes) (time.Time, error) {
+	return parseDateTime([]byte(b))
+}
+
+func parseDateTime(b []byte) (time.Time, error) {
 	n, d, err := parseDate(b)
 	if err != nil {
 		return time.Time{}, overrideUnexpectedTokenValue(err, b)

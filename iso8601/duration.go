@@ -26,7 +26,11 @@ import (
 // or -P1M for interoperability, be aware that other programs may not recognize it.
 //
 // The function returns a Duration structure or an error if the parsing fails.
-func ParseDuration(b []byte) (Duration, error) {
+func ParseDuration[bytes []byte | ~string](b bytes) (Duration, error) {
+	return parseDuration([]byte(b))
+}
+
+func parseDuration(b []byte) (Duration, error) {
 	var (
 		y                 int
 		m                 int

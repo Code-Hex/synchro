@@ -14,11 +14,11 @@ import (
 //	±hhmmss     ±hh:mm:ss
 //
 // The function returns a Zone structure or an error if the parsing fails.
-func ParseZone(b []byte) (Zone, error) {
+func ParseZone[bytes []byte | ~string](b bytes) (Zone, error) {
 	if len(b) > 3 && b[3] == ':' {
-		return parseExtendedZone(b)
+		return parseExtendedZone([]byte(b))
 	}
-	return parseBasicZone(b)
+	return parseBasicZone([]byte(b))
 }
 
 /*

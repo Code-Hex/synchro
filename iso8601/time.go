@@ -20,8 +20,8 @@ import (
 //	123045,123456789   12:30:45,123456789
 //
 // The function returns a Time structure or an error if the parsing fails.
-func ParseTime(b []byte) (Time, error) {
-	n, t, err := parseTime(b)
+func ParseTime[bytes []byte | ~string](b bytes) (Time, error) {
+	n, t, err := parseTime([]byte(b))
 	if err != nil {
 		return Time{}, err
 	}
