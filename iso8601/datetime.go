@@ -1,8 +1,32 @@
 package iso8601
 
 import (
+	"fmt"
+	"strings"
 	"time"
 )
+
+var defaultParseDateTimeOptions = parseDateTimeOptions{
+	timeDesignators: []byte{'T'},
+}
+
+type parseDateTimeOptions struct {
+	timeDesignators []byte
+}
+
+// ParseDateTimeOptions is a function type that modifies the parsing behavior
+// of a datetime string. It acts as a functional option.
+type ParseDateTimeOptions func(*parseDateTimeOptions)
+
+// WithTimeDesignators is an option that modifies the set of valid
+// characters which can be used as time designators when parsing a datetime string.
+//
+// By default, if no designators are set, the parser uses only 'T'.
+func WithTimeDesignators(designators ...byte) ParseDateTimeOptions {
+	return func(o *parseDateTimeOptions) {
+		o.timeDesignators = append(o.timeDesignators, designators...)
+	}
+}
 
 // ParseDateTime attempts to parse a given byte slice representing combined date, time,
 // and optionally timezone offset in supported ISO 8601 formats. Supported formats include:
@@ -24,11 +48,17 @@ import (
 // In the absence of a time zone indicator, Parse returns a time in UTC.
 //
 // If parsing fails, an error is returned.
-func ParseDateTime[bytes []byte | ~string](b bytes) (time.Time, error) {
-	return parseDateTime([]byte(b))
+func ParseDateTime[bytes []byte | ~string](b bytes, opts ...ParseDateTimeOptions) (time.Time, error) {
+	return parseDateTime([]byte(b), opts...)
 }
 
-func parseDateTime(b []byte) (time.Time, error) {
+func parseDateTime(b []byte, opts ...ParseDateTimeOptions) (time.Time, error) {
+	o := new(parseDateTimeOptions)
+	*o = defaultParseDateTimeOptions // apply default options
+	for _, opt := range opts {
+		opt(o)
+	}
+
 	n, d, err := parseDate(b)
 	if err != nil {
 		return time.Time{}, overrideUnexpectedTokenValue(err, b)
@@ -38,12 +68,27 @@ func parseDateTime(b []byte) (time.Time, error) {
 		return dt.StdTime(), nil
 	}
 
-	if len(b) > n && b[n] != 'T' {
-		return time.Time{}, &UnexpectedTokenError{
-			Value:      string(b),
-			Token:      string(b[n]),
-			AfterToken: string(b[:n]),
-			Expected:   "T",
+	if len(b) > n {
+		var found bool
+		for _, designator := range o.timeDesignators {
+			if b[n] == designator {
+				found = true
+				break
+			}
+		}
+		if !found {
+			var buf strings.Builder
+			size := len(o.timeDesignators)
+			for _, designator := range o.timeDesignators[:size-1] {
+				fmt.Fprintf(&buf, "%q, ", designator)
+			}
+			fmt.Fprintf(&buf, "%q", o.timeDesignators[size-1])
+			return time.Time{}, &UnexpectedTokenError{
+				Value:      string(b),
+				Token:      string(b[n]),
+				AfterToken: string(b[:n]),
+				Expected:   buf.String(),
+			}
 		}
 	}
 	n++

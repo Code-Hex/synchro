@@ -171,7 +171,7 @@ func TestParseDateTime(t *testing.T) {
 				Value:      "2017-04-24X",
 				Token:      "X",
 				AfterToken: "2017-04-24",
-				Expected:   "T",
+				Expected:   "'T'",
 			},
 		},
 		{
@@ -219,4 +219,33 @@ func TestParseDateTime(t *testing.T) {
 			}
 		})
 	}
+
+	t.Run("WithTimeDesignators", func(t *testing.T) {
+		t.Run("valid", func(t *testing.T) {
+			want := time.Date(2017, 4, 24, 9, 41, 34, 89312523*10, time.UTC)
+			got, err := ParseDateTime("2017-04-24 09:41:34.89312523Z", WithTimeDesignators(' '))
+			if err != nil {
+				t.Fatal(err)
+			}
+			if diff := cmp.Diff(want, got); diff != "" {
+				t.Errorf("(-want, +got)\n%s", diff)
+			}
+		})
+
+		t.Run("invalid", func(t *testing.T) {
+			wantErr := &UnexpectedTokenError{
+				Value:      "2017-04-24X09:41:34",
+				Token:      "X",
+				AfterToken: "2017-04-24",
+				Expected:   `'T', ' '`,
+			}
+			_, err := ParseDateTime("2017-04-24X09:41:34", WithTimeDesignators(' '))
+			if err == nil {
+				t.Fatal("expected error")
+			}
+			if diff := cmp.Diff(wantErr, err); diff != "" {
+				t.Errorf("(-want, +got)\n%s", diff)
+			}
+		})
+	})
 }
