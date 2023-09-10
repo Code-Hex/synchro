@@ -33,6 +33,8 @@ func WithTimeDesignators(designators ...byte) ParseDateTimeOptions {
 //
 //	Basic                        Extended
 //	20070301                     2007-03-01
+//	2012W521                     2012-W52-1
+//	2012Q485                     2012-Q4-85
 //	20070301T1300Z               2007-03-01T13:00Z
 //	20070301T1300Z               2007-03-01T13:00Z
 //	20070301T1300+0100           2007-03-01T13:00+01:00
