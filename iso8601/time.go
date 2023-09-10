@@ -14,8 +14,19 @@ import (
  *  123045,123456789   12:30:45,123456789
  */
 func ParseTime(b []byte) (Time, error) {
-	_, t, err := parseTime(b)
-	return t, err
+	n, t, err := parseTime(b)
+	if err != nil {
+		return Time{}, err
+	}
+	if len(b) != n {
+		return Time{}, &UnexpectedTokenError{
+			Value:      string(b),
+			Token:      string(b[n:]),
+			AfterToken: string(b[:n]),
+			Expected:   string(b[:n]),
+		}
+	}
+	return t, nil
 }
 
 func parseTime(b []byte) (int, Time, error) {
@@ -124,10 +135,10 @@ func parseBasicTime(b []byte) (int, Time, error) {
 		n := 6
 
 		// hhmmss.fffffffff
-		if 7 < len(b) && (b[6] == '.' || b[6] == ',') {
+		if 6 < len(b) && (b[6] == '.' || b[6] == ',') {
 			var digits int
 			f, digits = parseFraction(b[7:])
-			n += digits + 1
+			n += digits + 1 // 1 == '.' or ','
 		}
 		t, err := hmsfTime(h, m, s, f)
 		return n, t, err
@@ -151,11 +162,12 @@ func parseBasicTime(b []byte) (int, Time, error) {
 }
 
 func parseFraction(b []byte) (int, int) {
-	digits := countDigits(b, 0)
+	n := countDigits(b, 0)
+	digits := n
 	if digits > 9 {
 		digits = 9 // nanoseconds
 	}
-	return parseNumber(b, 0, digits) * int(math.Pow10(9-digits)), digits
+	return parseNumber(b, 0, digits) * int(math.Pow10(9-digits)), n
 }
 
 func hmsfTime(h, m, s, f int) (Time, error) {

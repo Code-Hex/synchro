@@ -349,6 +349,24 @@ func TestParseTime(t *testing.T) {
 				Expected:   humanizeDigits(2),
 			},
 		},
+		{
+			name: "235959hello",
+			wantErr: &UnexpectedTokenError{
+				Value:      "235959hello",
+				Token:      "hello",
+				AfterToken: "235959",
+				Expected:   "235959",
+			},
+		},
+		{
+			name: "23:59:59hello",
+			wantErr: &UnexpectedTokenError{
+				Value:      "23:59:59hello",
+				Token:      "hello",
+				AfterToken: "23:59:59",
+				Expected:   "23:59:59",
+			},
+		},
 		// invalid time range
 		{
 			name: "2401",
@@ -425,6 +443,9 @@ func TestParseTime(t *testing.T) {
 			}
 			if diff := cmp.Diff(tt.want, got); diff != "" {
 				t.Errorf("(-want, +got)\n%s", diff)
+			}
+			if err != nil {
+				t.Error(err)
 			}
 		})
 	}
