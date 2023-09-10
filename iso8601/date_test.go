@@ -23,6 +23,14 @@ func Test_ParseDate(t *testing.T) {
 			},
 		},
 		{
+			name: "+20121224",
+			want: Date{
+				Year:  2012,
+				Month: time.December,
+				Day:   24,
+			},
+		},
+		{
 			name: "00001224",
 			want: Date{
 				Year:  0,
@@ -38,7 +46,22 @@ func Test_ParseDate(t *testing.T) {
 			},
 		},
 		{
+			name: "+2012359",
+			want: OrdinalDate{
+				Year: 2012,
+				Day:  359,
+			},
+		},
+		{
 			name: "2012W521",
+			want: WeekDate{
+				Year: 2012,
+				Week: 52,
+				Day:  1,
+			},
+		},
+		{
+			name: "+2012W521",
 			want: WeekDate{
 				Year: 2012,
 				Week: 52,
@@ -54,7 +77,23 @@ func Test_ParseDate(t *testing.T) {
 			},
 		},
 		{
+			name: "+2012Q485",
+			want: QuarterDate{
+				Year:    2012,
+				Quarter: 4,
+				Day:     85,
+			},
+		},
+		{
 			name: "2012-12-24",
+			want: Date{
+				Year:  2012,
+				Month: time.December,
+				Day:   24,
+			},
+		},
+		{
+			name: "+2012-12-24",
 			want: Date{
 				Year:  2012,
 				Month: time.December,
@@ -70,7 +109,22 @@ func Test_ParseDate(t *testing.T) {
 			},
 		},
 		{
+			name: "+0000-12-24",
+			want: Date{
+				Year:  0,
+				Month: time.December,
+				Day:   24,
+			},
+		},
+		{
 			name: "2012-359",
+			want: OrdinalDate{
+				Year: 2012,
+				Day:  359,
+			},
+		},
+		{
+			name: "+2012-359",
 			want: OrdinalDate{
 				Year: 2012,
 				Day:  359,
@@ -118,8 +172,9 @@ func Test_ParseDate(t *testing.T) {
 		{
 			name: "20",
 			wantErr: &UnexpectedTokenError{
-				Value: "20",
-				Token: humanizeDigits(2),
+				Value:    "20",
+				Token:    humanizeDigits(2),
+				Expected: "date format",
 			},
 		},
 		{
@@ -395,6 +450,24 @@ func Test_ParseDate(t *testing.T) {
 				Max:     90,
 			},
 		},
+		{
+			name: "20121224Hello",
+			wantErr: &UnexpectedTokenError{
+				Value:      "20121224Hello",
+				Token:      "Hello",
+				AfterToken: "20121224",
+				Expected:   "20121224",
+			},
+		},
+		{
+			name: "+0000-366Hello",
+			wantErr: &UnexpectedTokenError{
+				Value:      "+0000-366Hello",
+				Token:      "Hello",
+				AfterToken: "+0000-366",
+				Expected:   "+0000-366",
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -407,6 +480,9 @@ func Test_ParseDate(t *testing.T) {
 			}
 			if diff := cmp.Diff(tt.want, got); diff != "" {
 				t.Errorf("(-want, +got)\n%s", diff)
+			}
+			if err != nil {
+				t.Error(err)
 			}
 		})
 	}

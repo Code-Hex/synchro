@@ -40,17 +40,41 @@ func parseNumber(b []byte, start, width int) (v int) {
  *  2012Q485   2012-Q4-85   Quarter date
  */
 func ParseDate(b []byte) (DateLike, error) {
+	n, d, err := parseDate(b)
+	if err != nil {
+		return nil, err
+	}
+	if len(b) != n {
+		return nil, &UnexpectedTokenError{
+			Value:      string(b),
+			Token:      string(b[n:]),
+			AfterToken: string(b[:n]),
+			Expected:   string(b[:n]),
+		}
+	}
+	return d, err
+}
+
+func parseDate(b []byte) (int, DateLike, error) {
 	var (
 		y int
 		x int // month or week or quarter
 		d int
 	)
+
+	// To allow leading '+' signed year components.
+	signed := 0
+	if len(b) > 0 && b[0] == '+' {
+		b = b[1:]
+		signed++
+	}
+
 	n := countDigits(b, 0)
 	switch n {
 	case 4: /* 2012 (year) */
 		y = parseNumber(b, 0, 4)
 		if len(b) < 8 {
-			return nil, &UnexpectedTokenError{
+			return 0, nil, &UnexpectedTokenError{
 				Value:      string(b),
 				Token:      string(b[4:]),
 				AfterToken: strconv.Itoa(y),
@@ -63,7 +87,7 @@ func ParseDate(b []byte) (DateLike, error) {
 		case '-': // 2012-359 | 2012-12-24 | 2012-W52-1 | 2012-Q4-85
 		case 'Q': // 2012Q485
 			if n != 3 {
-				return nil, &UnexpectedTokenError{
+				return 0, nil, &UnexpectedTokenError{
 					Value:      string(b),
 					Token:      humanizeDigits(n),
 					AfterToken: "Q",
@@ -72,10 +96,11 @@ func ParseDate(b []byte) (DateLike, error) {
 			}
 			x = parseNumber(b, 5, 1)
 			d = parseNumber(b, 6, 2)
-			return yqdISODate(y, x, d)
+			dt, err := yqdISODate(y, x, d)
+			return 8 + signed, dt, err
 		case 'W': // 2012W521
 			if n != 3 {
-				return nil, &UnexpectedTokenError{
+				return 0, nil, &UnexpectedTokenError{
 					Value:      string(b),
 					Token:      humanizeDigits(n),
 					AfterToken: "W",
@@ -84,9 +109,10 @@ func ParseDate(b []byte) (DateLike, error) {
 			}
 			x = parseNumber(b, 5, 2)
 			d = parseNumber(b, 7, 1)
-			return ywdISODate(y, x, d)
+			dt, err := ywdISODate(y, x, d)
+			return 8 + signed, dt, err
 		default:
-			return nil, &UnexpectedTokenError{
+			return 0, nil, &UnexpectedTokenError{
 				Value:      string(b),
 				Token:      string(b[4:]),
 				AfterToken: strconv.Itoa(y),
@@ -101,7 +127,7 @@ func ParseDate(b []byte) (DateLike, error) {
 				switch b[5] {
 				case 'Q': // 2012-Q4-85
 					if n != 1 {
-						return nil, &UnexpectedTokenError{
+						return 0, nil, &UnexpectedTokenError{
 							Value:      string(b),
 							Token:      humanizeDigits(n),
 							AfterToken: "Q",
@@ -110,7 +136,7 @@ func ParseDate(b []byte) (DateLike, error) {
 					}
 					x = parseNumber(b, 6, 1)
 					if b[7] != '-' {
-						return nil, &UnexpectedTokenError{
+						return 0, nil, &UnexpectedTokenError{
 							Value:      string(b),
 							Token:      string(b[7]),
 							AfterToken: fmt.Sprintf("Q%d", x),
@@ -118,7 +144,7 @@ func ParseDate(b []byte) (DateLike, error) {
 						}
 					}
 					if c := countDigits(b, 8); c != 2 {
-						return nil, &UnexpectedTokenError{
+						return 0, nil, &UnexpectedTokenError{
 							Value:      string(b),
 							Token:      humanizeDigits(c),
 							AfterToken: fmt.Sprintf("Q%d-", x),
@@ -126,10 +152,11 @@ func ParseDate(b []byte) (DateLike, error) {
 						}
 					}
 					d = parseNumber(b, 8, 2)
-					return yqdISODate(y, x, d)
+					dt, err := yqdISODate(y, x, d)
+					return 10 + signed, dt, err
 				case 'W': // 2012-W52-1
 					if n != 2 {
-						return nil, &UnexpectedTokenError{
+						return 0, nil, &UnexpectedTokenError{
 							Value:      string(b),
 							Token:      humanizeDigits(n),
 							AfterToken: "W",
@@ -138,7 +165,7 @@ func ParseDate(b []byte) (DateLike, error) {
 					}
 					x = parseNumber(b, 6, 2)
 					if b[8] != '-' {
-						return nil, &UnexpectedTokenError{
+						return 0, nil, &UnexpectedTokenError{
 							Value:      string(b),
 							Token:      string(b[8]),
 							AfterToken: fmt.Sprintf("W%02d", x),
@@ -146,7 +173,7 @@ func ParseDate(b []byte) (DateLike, error) {
 						}
 					}
 					if c := countDigits(b, 9); c != 1 {
-						return nil, &UnexpectedTokenError{
+						return 0, nil, &UnexpectedTokenError{
 							Value:      string(b),
 							Token:      humanizeDigits(c),
 							AfterToken: fmt.Sprintf("W%02d-", x),
@@ -154,13 +181,14 @@ func ParseDate(b []byte) (DateLike, error) {
 						}
 					}
 					d = parseNumber(b, 9, 1)
-					return ywdISODate(y, x, d)
+					dt, err := ywdISODate(y, x, d)
+					return 10 + signed, dt, err
 				}
 			}
 		case 2: // 2012-12-24
 			x = parseNumber(b, 5, 2)
 			if b[7] != '-' {
-				return nil, &UnexpectedTokenError{
+				return 0, nil, &UnexpectedTokenError{
 					Value:      string(b),
 					Token:      string(b[7]),
 					AfterToken: fmt.Sprintf("-%02d", x),
@@ -168,7 +196,7 @@ func ParseDate(b []byte) (DateLike, error) {
 				}
 			}
 			if c := countDigits(b, 8); c != 2 {
-				return nil, &UnexpectedTokenError{
+				return 0, nil, &UnexpectedTokenError{
 					Value:      string(b),
 					Token:      humanizeDigits(c),
 					AfterToken: fmt.Sprintf("-%02d-", x),
@@ -176,13 +204,14 @@ func ParseDate(b []byte) (DateLike, error) {
 				}
 			}
 			d = parseNumber(b, 8, 2)
-			n = 10
-			return ymdISODate(y, x, d)
+			dt, err := ymdISODate(y, x, d)
+			return 10 + signed, dt, err
 		case 3: // 2012-359
 			d = parseNumber(b, 5, 3)
-			return ydISODate(y, d)
+			dt, err := ydISODate(y, d)
+			return 8 + signed, dt, err
 		default:
-			return nil, &UnexpectedTokenError{
+			return 0, nil, &UnexpectedTokenError{
 				Value:      string(b),
 				Token:      humanizeDigits(n),
 				AfterToken: fmt.Sprintf("%d-", y),
@@ -192,19 +221,21 @@ func ParseDate(b []byte) (DateLike, error) {
 	case 7: // 2012359 (basic ordinal date)
 		y = parseNumber(b, 0, 4)
 		d = parseNumber(b, 4, 3)
-		return ydISODate(y, d)
+		dt, err := ydISODate(y, d)
+		return 7 + signed, dt, err
 	case 8: // 20121224 (basic calendar date)
 		y = parseNumber(b, 0, 4)
 		x = parseNumber(b, 4, 2)
 		d = parseNumber(b, 6, 2)
-		return ymdISODate(y, x, d)
+		dt, err := ymdISODate(y, x, d)
+		return 8 + signed, dt, err
 	default:
 	}
-	return nil, &UnexpectedTokenError{
+	return 0, nil, &UnexpectedTokenError{
 		Value:      string(b),
 		Token:      humanizeDigits(n),
 		AfterToken: "",
-		Expected:   "",
+		Expected:   "date format",
 	}
 }
 

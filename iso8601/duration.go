@@ -167,8 +167,9 @@ func ParseDuration(b []byte) (Duration, error) {
 				}
 			}
 			i++
-			fraction = parseFraction(b[i:])
-			i += countDigits(b[i:], 0) // FIXME: count in also parseFraction...
+			var digits int
+			fraction, digits = parseFraction(b[i:])
+			i += digits
 			seenFranction = true
 		}
 

@@ -1,6 +1,7 @@
 package iso8601
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 )
@@ -25,4 +26,13 @@ func (u *UnexpectedTokenError) Error() string {
 	}
 	fmt.Fprintf(&buf, " (%q)", u.Value)
 	return buf.String()
+}
+
+func overrideUnexpectedTokenValue(err error, b []byte) error {
+	var unexpected *UnexpectedTokenError
+	if errors.As(err, &unexpected) {
+		unexpected.Value = string(b)
+		err = unexpected
+	}
+	return err
 }

@@ -1,6 +1,8 @@
 package iso8601
 
-import "fmt"
+import (
+	"fmt"
+)
 
 func ParseZone(b []byte) (Zone, error) {
 	if len(b) > 3 && b[3] == ':' {

@@ -59,6 +59,10 @@ func (d Date) Validate() error {
 	return nil
 }
 
+func (d Date) StdTime() time.Time {
+	return time.Date(d.Year, d.Month, d.Day, 0, 0, 0, 0, time.UTC)
+}
+
 type QuarterDate struct {
 	Year    int
 	Quarter int

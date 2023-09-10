@@ -471,7 +471,7 @@ func Test_parseExtendedTime(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := parseExtendedTime([]byte(tt.name))
+			_, got, err := parseExtendedTime([]byte(tt.name))
 			if tt.wantErr != nil {
 				if diff := cmp.Diff(tt.wantErr, err); diff != "" {
 					t.Errorf("error: (-want, +got)\n%s", diff)
