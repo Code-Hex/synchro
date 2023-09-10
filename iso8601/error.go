@@ -6,6 +6,10 @@ import (
 	"strings"
 )
 
+// UnexpectedTokenError represents an error encountered when an unexpected
+// token is detected during parsing. This error provides details about
+// the token that was unexpected, any preceding token, and what was
+// expected in its place.
 type UnexpectedTokenError struct {
 	Value      string
 	Token      string
@@ -15,6 +19,7 @@ type UnexpectedTokenError struct {
 
 var _ error = (*UnexpectedTokenError)(nil)
 
+// Error implements the error interface.
 func (u *UnexpectedTokenError) Error() string {
 	var buf strings.Builder
 	fmt.Fprintf(&buf, "unexpected token %q", u.Token)
