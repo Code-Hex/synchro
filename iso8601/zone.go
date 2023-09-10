@@ -4,6 +4,16 @@ import (
 	"fmt"
 )
 
+// ParseZone attempts to parse a given byte slice representing a timezone offset
+// in various supported ISO 8601 formats. Supported formats include:
+//
+//	Basic       Extended
+//	Z           N/A
+//	±hh         N/A
+//	±hhmm       ±hh:mm
+//	±hhmmss     ±hh:mm:ss
+//
+// The function returns a Zone structure or an error if the parsing fails.
 func ParseZone(b []byte) (Zone, error) {
 	if len(b) > 3 && b[3] == ':' {
 		return parseExtendedZone(b)

@@ -4,6 +4,26 @@ import (
 	"time"
 )
 
+// ParseDateTime attempts to parse a given byte slice representing combined date, time,
+// and optionally timezone offset in supported ISO 8601 formats. Supported formats include:
+//
+//	Basic                        Extended
+//	20070301                     2007-03-01
+//	20070301T1300Z               2007-03-01T13:00Z
+//	20070301T1300Z               2007-03-01T13:00Z
+//	20070301T1300+0100           2007-03-01T13:00+01:00
+//	20070301T1300-0600           2007-03-01T13:00-06:00
+//	20070301T130045Z             2007-03-01T13:00:45Z
+//	20070301T130045+0100         2007-03-01T13:00:45+01:00
+//	... and other combinations
+//
+// The function returns a time.Time structure representing the parsed date-time, adjusted
+// for the parsed timezone offset if provided. If no timezone is specified, the time is
+// returned in UTC.
+//
+// In the absence of a time zone indicator, Parse returns a time in UTC.
+//
+// If parsing fails, an error is returned.
 func ParseDateTime(b []byte) (time.Time, error) {
 	n, d, err := parseDate(b)
 	if err != nil {

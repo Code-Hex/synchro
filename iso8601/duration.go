@@ -6,16 +6,26 @@ import (
 	"time"
 )
 
-// fraction:     (\d+)(?:[.,](\d{1,9}))?
-// durationTime: (?:${fraction}H)?(?:${fraction}M)?(?:${fraction}S)?
-// durationDate: (?:(\d+)Y)?(?:(\d+)M)?(?:(\d+)W)?(?:(\d+)D)?
-// duration:     ^([+\u2212-])?P${durationDate}(?:T(?!$)${durationTime})?$
+// ParseDuration attempts to parse a given byte slice representing a duration in the
+// ISO 8601 format. Supported formats align with the regular expression patterns:
 //
-// NOTE: According to the ISO 8601-1 standard, weeks are not allowed to appear
-// together with any other units, and durations can only be positive. As extensions
-// to the standard, ISO 8601-2 allows a sign character at the start of the string, and
-// allows combining weeks with other units. If you intend to use a string such as
-// P3W1D, +P1M, or -P1M for interoperability, note that other programs may not accept it.
+//	fraction:     (\d+)(?:[.,](\d{1,9}))?
+//	durationTime: (?:${fraction}H)?(?:${fraction}M)?(?:${fraction}S)?
+//	durationDate: (?:(\d+)Y)?(?:(\d+)M)?(?:(\d+)W)?(?:(\d+)D)?
+//	duration:     ^([+-])?P${durationDate}(?:T(?!$)${durationTime})?$
+//
+// Examples of valid durations include:
+//
+//	PnYnMnDTnHnMnS (e.g., P3Y6M4DT12H30M5S)
+//	PnW (e.g., P4W)
+//
+// According to the ISO 8601-1 standard, weeks are not allowed to appear together
+// with any other units, and durations can only be positive. However, as extensions
+// to the standard, ISO 8601-2 allows a sign character at the start of the string and
+// permits combining weeks with other units. If using a string such as P3W1D, +P1M,
+// or -P1M for interoperability, be aware that other programs may not recognize it.
+//
+// The function returns a Duration structure or an error if the parsing fails.
 func ParseDuration(b []byte) (Duration, error) {
 	var (
 		y                 int

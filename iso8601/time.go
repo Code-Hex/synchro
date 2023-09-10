@@ -5,18 +5,21 @@ import (
 	"math"
 )
 
-/*
- *  Basic              Extended
- *  12                 N/A
- *  12.123456789       N/A
- *  12,123456789       N/A
- *  1230               12:30
- *  1230.123456789     12:30.123456789
- *  1230,123456789     12:30,123456789
- *  123045             12:30:45
- *  123045.123456789   12:30:45.123456789
- *  123045,123456789   12:30:45,123456789
- */
+// ParseTime attempts to parse a given byte slice representing a time in
+// various supported ISO 8601 formats. Supported formats include:
+//
+//	Basic              Extended
+//	12                 N/A
+//	12.123456789       N/A
+//	12,123456789       N/A
+//	1230               12:30
+//	1230.123456789     12:30.123456789
+//	1230,123456789     12:30,123456789
+//	123045             12:30:45
+//	123045.123456789   12:30:45.123456789
+//	123045,123456789   12:30:45,123456789
+//
+// The function returns a Time structure or an error if the parsing fails.
 func ParseTime(b []byte) (Time, error) {
 	n, t, err := parseTime(b)
 	if err != nil {

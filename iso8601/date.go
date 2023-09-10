@@ -32,13 +32,16 @@ func parseNumber(b []byte, start, width int) (v int) {
 	return
 }
 
-/*
- *  Basic      Extended
- *  20121224   2012-12-24   Calendar date   (ISO 8601)
- *  2012359    2012-359     Ordinal date    (ISO 8601)
- *  2012W521   2012-W52-1   Week date       (ISO 8601)
- *  2012Q485   2012-Q4-85   Quarter date
- */
+// ParseDate attempts to parse a given byte slice representing a date in
+// various supported ISO 8601 formats. Supported formats include:
+//
+//	Basic           Extended
+//	20121224        2012-12-24    Calendar date   (ISO 8601)
+//	2012359         2012-359      Ordinal date    (ISO 8601)
+//	2012W521        2012-W52-1    Week date       (ISO 8601)
+//	2012Q485        2012-Q4-85    Quarter date
+//
+// The function returns an implementation of DateLike or an error if the parsing fails.
 func ParseDate(b []byte) (DateLike, error) {
 	n, d, err := parseDate(b)
 	if err != nil {
