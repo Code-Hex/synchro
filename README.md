@@ -1,4 +1,4 @@
-# Synchro: Timezone-typesafe date and time library for Go
+# 🕰️ Synchro: Timezone-typesafe date and time library for Go
 
 [![test](https://github.com/Code-Hex/synchro/actions/workflows/test.yml/badge.svg)](https://github.com/Code-Hex/synchro/actions/workflows/test.yml) [![codecov](https://codecov.io/gh/Code-Hex/synchro/graph/badge.svg?token=VWPbmNRHw8)](https://codecov.io/gh/Code-Hex/synchro) [![Go Reference](https://pkg.go.dev/badge/github.com/Code-Hex/synchro/.svg)](https://pkg.go.dev/github.com/Code-Hex/synchro/)
 
