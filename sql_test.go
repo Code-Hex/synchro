@@ -30,6 +30,30 @@ func TestTime_Scan(t *testing.T) {
 				err:  false,
 			},
 			{
+				name: "datetime as string",
+				src:  "2023-09-10",
+				want: synchro.New[tz.UTC](2023, 9, 10, 0, 0, 0, 0),
+				err:  false,
+			},
+			{
+				name: "datetime as bytes",
+				src:  []byte("2023-09-10"),
+				want: synchro.New[tz.UTC](2023, 9, 10, 0, 0, 0, 0),
+				err:  false,
+			},
+			{
+				name: "timestamp as string",
+				src:  "2023-09-10 14:03:54.000115898+00",
+				want: synchro.New[tz.UTC](2023, 9, 10, 14, 3, 54, 115898),
+				err:  false,
+			},
+			{
+				name: "timestamp as bytes",
+				src:  []byte("2023-09-10 14:03:54.000115898+00"),
+				want: synchro.New[tz.UTC](2023, 9, 10, 14, 3, 54, 115898),
+				err:  false,
+			},
+			{
 				name: "unknown type",
 				src:  123,
 				want: synchro.Time[tz.UTC]{},
@@ -58,6 +82,30 @@ func TestTime_Scan(t *testing.T) {
 				name: "time.Time",
 				src:  time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC),
 				want: synchro.New[tz.AsiaTokyo](2021, 1, 1, 9, 0, 0, 0),
+				err:  false,
+			},
+			{
+				name: "datetime as string",
+				src:  "2023-09-10",
+				want: synchro.New[tz.AsiaTokyo](2023, 9, 10, 9, 0, 0, 0),
+				err:  false,
+			},
+			{
+				name: "datetime as bytes",
+				src:  []byte("2023-09-10"),
+				want: synchro.New[tz.AsiaTokyo](2023, 9, 10, 9, 0, 0, 0),
+				err:  false,
+			},
+			{
+				name: "timestamp as string",
+				src:  "2023-09-10 14:03:54.000115898+00",
+				want: synchro.New[tz.AsiaTokyo](2023, 9, 10, 23, 3, 54, 115898),
+				err:  false,
+			},
+			{
+				name: "timestamp as bytes",
+				src:  []byte("2023-09-10 14:03:54.000115898+00"),
+				want: synchro.New[tz.AsiaTokyo](2023, 9, 10, 23, 3, 54, 115898),
 				err:  false,
 			},
 			{
