@@ -150,9 +150,10 @@ func parseDateTime(b []byte, opts ...ParseDateTimeOptions) (time.Time, error) {
 
 	// Try to align this part with Go's time.Parse timezone handling as closely as possible.
 	// Use local zone with the given offset if possible.
-	_, offset, _, _, _ := lookup(o.local, result.Unix())
+	localResult := result.In(o.local)
+	_, offset := localResult.Zone()
 	if offset == zoneOffset {
-		result = result.In(o.local)
+		result = localResult
 	} else {
 		result = result.In(time.FixedZone("", zoneOffset))
 	}
