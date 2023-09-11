@@ -7,4 +7,4 @@ import (
 )
 
 //go:linkname lookup time.(*Location).lookup
-func lookup(loc *time.Location, sec int64) (string, offset int, start, end int64, isDST bool)
+func lookup(loc *time.Location, sec int64) (name string, offset int, start, end int64, isDST bool)

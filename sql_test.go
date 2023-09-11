@@ -54,6 +54,18 @@ func TestTime_Scan(t *testing.T) {
 				err:  false,
 			},
 			{
+				name: "invalid format as string",
+				src:  "unknown",
+				want: synchro.Time[tz.UTC]{},
+				err:  true,
+			},
+			{
+				name: "invalid format as byte",
+				src:  []byte("unknown"),
+				want: synchro.Time[tz.UTC]{},
+				err:  true,
+			},
+			{
 				name: "unknown type",
 				src:  123,
 				want: synchro.Time[tz.UTC]{},
@@ -107,6 +119,18 @@ func TestTime_Scan(t *testing.T) {
 				src:  []byte("2023-09-10 14:03:54.000115898+00"),
 				want: synchro.New[tz.AsiaTokyo](2023, 9, 10, 23, 3, 54, 115898),
 				err:  false,
+			},
+			{
+				name: "invalid format as string",
+				src:  "unknown",
+				want: synchro.Time[tz.AsiaTokyo]{},
+				err:  true,
+			},
+			{
+				name: "invalid format as byte",
+				src:  []byte("unknown"),
+				want: synchro.Time[tz.AsiaTokyo]{},
+				err:  true,
 			},
 			{
 				name: "unknown type",

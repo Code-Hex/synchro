@@ -266,6 +266,21 @@ func TestParseDateTime(t *testing.T) {
 			}
 		})
 
+		t.Run("present timezone offset is the same as Local", func(t *testing.T) {
+			backup := time.Local
+			time.Local = loc
+			defer func() { time.Local = backup }()
+
+			want := time.Date(2017, 4, 24, 9, 41, 34, 89312523*10, time.Local)
+			got, err := ParseDateTime("2017-04-24T09:41:34.89312523+09:00")
+			if err != nil {
+				t.Fatal(err)
+			}
+			if diff := cmp.Diff(want, got); diff != "" {
+				t.Errorf("(-want, +got)\n%s", diff)
+			}
+		})
+
 		t.Run("present timezone offset is the same as JST", func(t *testing.T) {
 			want := time.Date(2017, 4, 24, 9, 41, 34, 89312523*10, loc)
 			got, err := ParseDateTime("2017-04-24T09:41:34.89312523+09:00", WithInLocation(loc))
