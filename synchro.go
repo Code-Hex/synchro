@@ -90,7 +90,7 @@ func Parse[T TimeZone](layout, value string) (Time[T], error) {
 	if err != nil {
 		return Time[T]{}, err
 	}
-	return Time[T]{tm: tm}, nil
+	return In[T](tm), nil
 }
 
 // ParseISO parses an ISO8601-compliant date or datetime string and returns
@@ -110,7 +110,8 @@ func Parse[T TimeZone](layout, value string) (Time[T], error) {
 //	20070301T130045+0100         2007-03-01T13:00:45+01:00
 //	... and other combinations
 func ParseISO[T TimeZone](value string) (Time[T], error) {
-	tm, err := iso8601.ParseDateTime[string](value)
+	var tz T
+	tm, err := iso8601.ParseDateTime[string](value, iso8601.WithInLocation(tz.Location()))
 	if err != nil {
 		return Time[T]{}, err
 	}

@@ -311,8 +311,6 @@ func ExampleTime_Day() {
 }
 
 func ExampleTime_Equal() {
-	// Unlike the equal operator, Equal is aware that d1 and d2 are the
-	// same instant but in different time zones.
 	d1 := synchro.New[tz.UTC](2000, 2, 1, 12, 30, 0, 0)
 	d2, _ := synchro.Parse[tz.UTC]("2006 Jan 02 15:04:05 (MST)", "2000 Feb 01 12:30:00 (JST)")
 
@@ -326,8 +324,8 @@ func ExampleTime_Equal() {
 
 	// Output:
 	// d1 = "2000-02-01 12:30:00 +0000 UTC"
-	// d2 = "2000-02-01 12:30:00 +0000 JST"
-	// datesEqualUsingEqualOperator = false
+	// d2 = "2000-02-01 12:30:00 +0000 UTC"
+	// datesEqualUsingEqualOperator = true
 	// datesEqualUsingFunction = true
 }
 

@@ -21,19 +21,28 @@ func (t *Time[T]) Scan(src any) error {
 		*t = Time[T]{} // zero value
 		return nil
 	}
+	var tz T
 	switch s := src.(type) {
 	case time.Time:
 		*t = In[T](s)
 		return nil
 	case string:
-		parsed, err := iso8601.ParseDateTime[string](s, iso8601.WithTimeDesignators(' '))
+		parsed, err := iso8601.ParseDateTime[string](
+			s,
+			iso8601.WithTimeDesignators(' '),
+			iso8601.WithInLocation(tz.Location()),
+		)
 		if err != nil {
 			return err
 		}
 		*t = In[T](parsed)
 		return nil
 	case []byte:
-		parsed, err := iso8601.ParseDateTime[[]byte](s, iso8601.WithTimeDesignators(' '))
+		parsed, err := iso8601.ParseDateTime[[]byte](
+			s,
+			iso8601.WithTimeDesignators(' '),
+			iso8601.WithInLocation(tz.Location()),
+		)
 		if err != nil {
 			return err
 		}
