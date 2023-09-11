@@ -267,11 +267,13 @@ func parseFraction(b []byte) (int, int) {
 }
 
 func hmsfTime(h, m, s, f int) (Time, error) {
+	s += int(math.Trunc(float64(f)/1e9)) % 60
+	m += int(math.Trunc(float64(f) / 60e9))
 	t := Time{
 		Hour:       h,
 		Minute:     m,
 		Second:     s,
-		Nanosecond: f,
+		Nanosecond: f % int(1e9),
 	}
 	if err := t.Validate(); err != nil {
 		return Time{}, err

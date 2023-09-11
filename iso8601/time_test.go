@@ -169,8 +169,8 @@ func TestParseTime(t *testing.T) {
 			want: Time{
 				Hour:       14,
 				Minute:     30,
-				Second:     00,
-				Nanosecond: int(time.Minute) / 2,
+				Second:     30,
+				Nanosecond: 0,
 			},
 		},
 		{
@@ -178,26 +178,26 @@ func TestParseTime(t *testing.T) {
 			want: Time{
 				Hour:       14,
 				Minute:     30,
-				Second:     00,
-				Nanosecond: int(time.Minute) / 2,
+				Second:     30,
+				Nanosecond: 0,
 			},
 		},
 		{
 			name: "14.5",
 			want: Time{
 				Hour:       14,
-				Minute:     00,
+				Minute:     30,
 				Second:     00,
-				Nanosecond: int(time.Hour) / 2,
+				Nanosecond: 0,
 			},
 		},
 		{
 			name: "14,5",
 			want: Time{
 				Hour:       14,
-				Minute:     00,
+				Minute:     30,
 				Second:     00,
-				Nanosecond: int(time.Hour) / 2,
+				Nanosecond: 0,
 			},
 		},
 		{
@@ -337,8 +337,8 @@ func TestParseTime(t *testing.T) {
 			want: Time{
 				Hour:       14,
 				Minute:     30,
-				Second:     00,
-				Nanosecond: int(time.Minute) / 2,
+				Second:     30,
+				Nanosecond: 0,
 			},
 		},
 		{
@@ -346,8 +346,8 @@ func TestParseTime(t *testing.T) {
 			want: Time{
 				Hour:       14,
 				Minute:     30,
-				Second:     00,
-				Nanosecond: int(time.Minute) / 2,
+				Second:     30,
+				Nanosecond: 0,
 			},
 		},
 		{
