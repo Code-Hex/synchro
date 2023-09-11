@@ -8,10 +8,12 @@ import (
 
 var defaultParseDateTimeOptions = parseDateTimeOptions{
 	timeDesignators: []byte{'T'},
+	local:           time.Local,
 }
 
 type parseDateTimeOptions struct {
 	timeDesignators []byte
+	local           *time.Location
 }
 
 // ParseDateTimeOptions is a function type that modifies the parsing behavior
@@ -25,6 +27,15 @@ type ParseDateTimeOptions func(*parseDateTimeOptions)
 func WithTimeDesignators(designators ...byte) ParseDateTimeOptions {
 	return func(o *parseDateTimeOptions) {
 		o.timeDesignators = append(o.timeDesignators, designators...)
+	}
+}
+
+// WithInLocation is an options to interpret the time as in the given location.
+//
+// By default, if no location is set, the parser uses current location (Local).
+func WithInLocation(loc *time.Location) ParseDateTimeOptions {
+	return func(o *parseDateTimeOptions) {
+		o.local = loc
 	}
 }
 
@@ -43,11 +54,15 @@ func WithTimeDesignators(designators ...byte) ParseDateTimeOptions {
 //	20070301T130045+0100         2007-03-01T13:00:45+01:00
 //	... and other combinations
 //
-// The function returns a time.Time structure representing the parsed date-time, adjusted
-// for the parsed timezone offset if provided. If no timezone is specified, the time is
-// returned in UTC.
+// The function returns a time.Time struct representing the parsed date-time, adjusted
+// for the parsed timezone offset if provided.
 //
 // In the absence of a time zone indicator, Parse returns a time in UTC.
+//
+// When parsing a time with a zone offset like -0700, if the offset corresponds
+// to a time zone used by the current location (Local), then Parse uses that
+// location and zone in the returned time. Otherwise it records the time as
+// being in a fabricated location with time fixed at the given zone offset.
 //
 // If parsing fails, an error is returned.
 func ParseDateTime[bytes []byte | ~string](b bytes, opts ...ParseDateTimeOptions) (time.Time, error) {
@@ -113,8 +128,9 @@ func parseDateTime(b []byte, opts ...ParseDateTimeOptions) (time.Time, error) {
 	n += nt
 
 	result := time.Date(dt.Year, dt.Month, dt.Day, t.Hour, t.Minute, t.Second, t.Nanosecond, time.UTC)
+	// There is no offset. returns as UTC.
 	if len(b) == n {
-		return result, nil
+		return result.In(o.local), nil
 	}
 	if len(b) > n && !(b[n] == 'Z' || b[n] == '+' || b[n] == '-') {
 		return time.Time{}, &UnexpectedTokenError{
@@ -129,10 +145,17 @@ func parseDateTime(b []byte, opts ...ParseDateTimeOptions) (time.Time, error) {
 	if err != nil {
 		return time.Time{}, overrideUnexpectedTokenValue(err, b)
 	}
+	zoneOffset := zone.Offset()
+	result = result.Add(-1 * time.Duration(zoneOffset) * time.Second)
 
 	// Try to align this part with Go's time.Parse timezone handling as closely as possible.
-	offset := zone.Offset()
-	result = result.Add(-1 * time.Duration(offset) * time.Second)
+	// Use local zone with the given offset if possible.
+	_, offset, _, _, _ := lookup(o.local, result.Unix())
+	if offset == zoneOffset {
+		result = result.In(o.local)
+	} else {
+		result = result.In(time.FixedZone("", zoneOffset))
+	}
 
-	return result.In(time.FixedZone("", offset)), nil
+	return result, nil
 }
