@@ -8,7 +8,7 @@ type Semester[T TimeZone] struct {
 	t      Time[T]
 }
 
-// Quarter gets current semester.
+// Semester gets current semester.
 func (t Time[T]) Semester() Semester[T] {
 	return Semester[T]{
 		year:   t.Year(),
@@ -18,16 +18,16 @@ func (t Time[T]) Semester() Semester[T] {
 }
 
 // Year returns the year in which s occurs.
-func (q Semester[T]) Year() int { return q.year }
+func (s Semester[T]) Year() int { return s.year }
 
 // Number returns the number of semester.
-func (q Semester[T]) Number() int { return q.number }
+func (s Semester[T]) Number() int { return s.number }
 
 // Start returns start time in the semester.
-func (q Semester[T]) Start() Time[T] { return q.t.StartOfSemester() }
+func (s Semester[T]) Start() Time[T] { return s.t.StartOfSemester() }
 
 // End returns end time in the semester.
-func (q Semester[T]) End() Time[T] { return q.t.EndOfSemester() }
+func (s Semester[T]) End() Time[T] { return s.t.EndOfSemester() }
 
 // After reports whether the Semester instant s is after u.
 func (s Semester[T]) After(u Semester[T]) bool {
