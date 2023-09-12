@@ -74,6 +74,10 @@ If you have a feature request, please open an issue. It would be great if you co
 - [IsBetween](https://pkg.go.dev/github.com/Code-Hex/synchro#Time.IsBetween)
 - [IsLeapYear](https://pkg.go.dev/github.com/Code-Hex/synchro#Time.IsLeapYear)
 - [DiffInCalendarDays](https://pkg.go.dev/github.com/Code-Hex/synchro#Time.DiffInCalendarDays)
+- [Change](https://pkg.go.dev/github.com/Code-Hex/synchro#Time.Change)
+  - `Change` allows you to specify the date and time components you want to change and make modifications.
+- [Advance](https://pkg.go.dev/github.com/Code-Hex/synchro#Time.Advance)
+  - `Advance` allows you to specify the date and time components you want to increment and make modifications.
 
 
 ## TODO
