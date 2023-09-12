@@ -60,7 +60,7 @@ func ExampleNowContext() {
 	// 0001-01-01 00:00:00 +0000 UTC
 }
 
-func ExampleDate() {
+func ExampleNew() {
 	utc := synchro.New[tz.UTC](2009, time.November, 10, 23, 0, 0, 0)
 	fmt.Printf("Go launched at %s\n", utc)
 	// Output:
