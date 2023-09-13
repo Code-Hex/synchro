@@ -9,15 +9,24 @@ import (
 	"github.com/Code-Hex/synchro/tz"
 )
 
+// shorthand way
+type Y = synchro.Year
+type M = synchro.Month
+type D = synchro.Day
+type HH = synchro.Hour
+type MM = synchro.Minute
+type SS = synchro.Second
+type NS = synchro.Nanosecond
+
 func ExampleTime_Change() {
 	utc := synchro.New[tz.UTC](2009, time.November, 10, 23, 0, 0, 0)
-	c1 := utc.Change().Year(2010).Do()
-	c2 := utc.Change().Year(2010).Month(time.December).Do()
-	c3 := utc.Change().Year(2010).Month(time.December).Day(1).Do()
-	c4 := c3.Change().Hour(1).Do()
-	c5 := c3.Change().Hour(1).Minute(1).Do()
-	c6 := c3.Change().Hour(1).Minute(1).Second(1).Do()
-	c7 := c3.Change().Hour(1).Minute(1).Second(1).Nanosecond(123456789).Do()
+	c1 := utc.Change(synchro.Year(2010))
+	c2 := utc.Change(synchro.Year(2010), synchro.Month(time.December))
+	c3 := utc.Change(Y(2010), M(time.December), D(1))
+	c4 := c3.Change(synchro.Hour(1))
+	c5 := c3.Change(HH(1), MM(1))
+	c6 := c3.Change(HH(1), MM(1), SS(1))
+	c7 := c3.Change(HH(1), MM(1), SS(1), NS(123456789))
 	fmt.Printf("Go launched at %s\n", utc)
 	fmt.Println(c1)
 	fmt.Println(c2)
@@ -39,15 +48,15 @@ func ExampleTime_Change() {
 
 func ExampleTime_Advance() {
 	utc := synchro.New[tz.UTC](2009, time.November, 10, 23, 0, 0, 0)
-	c1 := utc.Advance().Year(1).Do()
-	c11 := utc.Advance().Year(1).Year(1).Do() // +2 years
+	c1 := utc.Advance(synchro.Year(1))
+	c11 := utc.Advance(Y(1), Y(1)) // +2 years
 
-	c2 := utc.Advance().Year(1).Month(1).Do()
-	c3 := utc.Advance().Year(1).Month(1).Day(1).Do()
-	c4 := c3.Advance().Hour(1).Do()
-	c5 := c3.Advance().Hour(1).Minute(1).Do()
-	c6 := c3.Advance().Hour(1).Minute(1).Second(1).Do()
-	c7 := c3.Advance().Hour(1).Minute(1).Second(1).Nanosecond(123456789).Do()
+	c2 := utc.Advance(Y(1), M(1))
+	c3 := utc.Advance(Y(1), M(1), D(1))
+	c4 := c3.Advance(HH(1))
+	c5 := c3.Advance(HH(1), MM(1))
+	c6 := c3.Advance(HH(1), MM(1), SS(1))
+	c7 := c3.Advance(HH(1), MM(1), SS(1), NS(123456789))
 
 	fmt.Printf("Go launched at %s\n", utc)
 	fmt.Println(c1)
@@ -76,42 +85,42 @@ func TestAdvance(t *testing.T) {
 	utc := synchro.New[tz.UTC](2009, time.November, 10, 23, 0, 0, 0)
 
 	t.Run("month twice", func(t *testing.T) {
-		got := utc.Advance().Month(1).Month(2).Do() // +3 months
+		got := utc.Advance(M(1), M(2)) // +3 months
 		want := synchro.New[tz.UTC](2010, time.February, 10, 23, 0, 0, 0)
 		if want != got {
 			t.Fatalf("- %s\n+ %s", want, got)
 		}
 	})
 	t.Run("day twice", func(t *testing.T) {
-		got := utc.Advance().Day(1).Day(2).Do() // +3 days
+		got := utc.Advance(D(1), D(2)) // +3 days
 		want := synchro.New[tz.UTC](2009, time.November, 13, 23, 0, 0, 0)
 		if want != got {
 			t.Fatalf("- %s\n+ %s", want, got)
 		}
 	})
 	t.Run("hour twice", func(t *testing.T) {
-		got := utc.Advance().Hour(1).Hour(2).Do() // +3 hours
+		got := utc.Advance(HH(1), HH(2)) // +3 hours
 		want := synchro.New[tz.UTC](2009, time.November, 11, 2, 0, 0, 0)
 		if want != got {
 			t.Fatalf("- %s\n+ %s", want, got)
 		}
 	})
 	t.Run("minute twice", func(t *testing.T) {
-		got := utc.Advance().Minute(5).Minute(60).Do() // +65 minutes
+		got := utc.Advance(MM(5), MM(60)) // +65 minutes
 		want := synchro.New[tz.UTC](2009, time.November, 11, 0, 5, 0, 0)
 		if want != got {
 			t.Fatalf("- %s\n+ %s", want, got)
 		}
 	})
 	t.Run("second twice", func(t *testing.T) {
-		got := utc.Advance().Second(5).Second(60).Do() // +65 seconds
+		got := utc.Advance(SS(5), SS(60)) // +65 seconds
 		want := synchro.New[tz.UTC](2009, time.November, 10, 23, 1, 5, 0)
 		if want != got {
 			t.Fatalf("- %s\n+ %s", want, got)
 		}
 	})
 	t.Run("nanosec twice", func(t *testing.T) {
-		got := utc.Advance().Nanosecond(5).Nanosecond(60).Do() // +65 nanosec
+		got := utc.Advance(NS(5), NS(60)) // +65 nanosec
 		want := synchro.New[tz.UTC](2009, time.November, 10, 23, 0, 0, 65)
 		if want != got {
 			t.Fatalf("- %s\n+ %s", want, got)
