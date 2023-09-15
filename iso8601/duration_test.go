@@ -921,6 +921,94 @@ func TestParseDuration(t *testing.T) {
 			},
 		},
 		{
+			name: "P00010101T010101",
+			want: Duration{
+				Year:   1,
+				Month:  time.Month(1),
+				Day:    1,
+				Hour:   1,
+				Minute: 1,
+				Second: 1,
+			},
+		},
+		{
+			name: "P00030604T123005",
+			want: Duration{
+				Year:   3,
+				Month:  time.Month(6),
+				Day:    4,
+				Hour:   12,
+				Minute: 30,
+				Second: 5,
+			},
+		},
+		{
+			name: "P00241102T100447",
+			want: Duration{
+				Year:   24,
+				Month:  time.Month(11),
+				Day:    2,
+				Hour:   10,
+				Minute: 4,
+				Second: 47,
+			},
+		},
+		{
+			name: "P00241102T240000",
+			want: Duration{
+				Year:   24,
+				Month:  time.Month(11),
+				Day:    2,
+				Hour:   24,
+				Minute: 0,
+				Second: 0,
+			},
+		},
+		{
+			name: "P0001-01-01T01:01:01",
+			want: Duration{
+				Year:   1,
+				Month:  time.Month(1),
+				Day:    1,
+				Hour:   1,
+				Minute: 1,
+				Second: 1,
+			},
+		},
+		{
+			name: "P0003-06-04T12:30:05",
+			want: Duration{
+				Year:   3,
+				Month:  time.Month(6),
+				Day:    4,
+				Hour:   12,
+				Minute: 30,
+				Second: 5,
+			},
+		},
+		{
+			name: "P0024-11-02T10:04:47",
+			want: Duration{
+				Year:   24,
+				Month:  time.Month(11),
+				Day:    2,
+				Hour:   10,
+				Minute: 4,
+				Second: 47,
+			},
+		},
+		{
+			name: "P0024-11-02T24:00:00",
+			want: Duration{
+				Year:   24,
+				Month:  time.Month(11),
+				Day:    2,
+				Hour:   24,
+				Minute: 0,
+				Second: 0,
+			},
+		},
+		{
 			name: "",
 			wantErr: &UnexpectedTokenError{
 				Value:      "",
@@ -1135,6 +1223,114 @@ func TestParseDuration(t *testing.T) {
 				Token:      ".",
 				AfterToken: "PT123,123H123",
 				Expected:   "only the smallest time unit can be fractional",
+			},
+		},
+		{
+			name: "P00011301T010101",
+			wantErr: &DurationRangeError{
+				Element: "month",
+				Value:   13,
+				Min:     0,
+				Max:     12,
+			},
+		},
+		{
+			name: "P00011232T010101",
+			wantErr: &DurationRangeError{
+				Element: "day",
+				Value:   32,
+				Min:     0,
+				Max:     31,
+			},
+		},
+		{
+			name: "P00011231T240101",
+			wantErr: &DurationRangeError{
+				Element: "hour",
+				Value:   24,
+				Min:     0,
+				Max:     24,
+			},
+		},
+		{
+			name: "P00011231T250000",
+			wantErr: &DurationRangeError{
+				Element: "hour",
+				Value:   25,
+				Min:     0,
+				Max:     24,
+			},
+		},
+		{
+			name: "P00011231T236000",
+			wantErr: &DurationRangeError{
+				Element: "minute",
+				Value:   60,
+				Min:     0,
+				Max:     59,
+			},
+		},
+		{
+			name: "P00011231T235960",
+			wantErr: &DurationRangeError{
+				Element: "second",
+				Value:   60,
+				Min:     0,
+				Max:     59,
+			},
+		},
+		{
+			name: "P0001-13-01T01:01:01",
+			wantErr: &DurationRangeError{
+				Element: "month",
+				Value:   13,
+				Min:     0,
+				Max:     12,
+			},
+		},
+		{
+			name: "P0001-12-32T01:01:01",
+			wantErr: &DurationRangeError{
+				Element: "day",
+				Value:   32,
+				Min:     0,
+				Max:     31,
+			},
+		},
+		{
+			name: "P0001-12-31T24:01:01",
+			wantErr: &DurationRangeError{
+				Element: "hour",
+				Value:   24,
+				Min:     0,
+				Max:     24,
+			},
+		},
+		{
+			name: "P0001-12-31T25:00:00",
+			wantErr: &DurationRangeError{
+				Element: "hour",
+				Value:   25,
+				Min:     0,
+				Max:     24,
+			},
+		},
+		{
+			name: "P0001-12-31T23:60:00",
+			wantErr: &DurationRangeError{
+				Element: "minute",
+				Value:   60,
+				Min:     0,
+				Max:     59,
+			},
+		},
+		{
+			name: "P0001-12-31T23:59:60",
+			wantErr: &DurationRangeError{
+				Element: "second",
+				Value:   60,
+				Min:     0,
+				Max:     59,
 			},
 		},
 	}
@@ -1557,6 +1753,213 @@ func TestDuration_String(t *testing.T) {
 		t.Run(tt.want, func(t *testing.T) {
 			if got := tt.d.String(); got != tt.want {
 				t.Errorf("Duration.String() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_parseAlternativeDuration(t *testing.T) {
+	tests := []struct {
+		name    string
+		want    Duration
+		wantErr error
+	}{
+		{
+			name: "P00010101T010101",
+			want: Duration{
+				Year:   1,
+				Month:  time.Month(1),
+				Day:    1,
+				Hour:   1,
+				Minute: 1,
+				Second: 1,
+			},
+		},
+		{
+			name: "P0001-01-01T01:01:01",
+			want: Duration{
+				Year:   1,
+				Month:  time.Month(1),
+				Day:    1,
+				Hour:   1,
+				Minute: 1,
+				Second: 1,
+			},
+		},
+		{
+			name: "X00010101T010101",
+			wantErr: &UnexpectedTokenError{
+				Value:      "X00010101T010101",
+				Token:      "X",
+				AfterToken: "",
+				Expected:   "P",
+			},
+		},
+		{
+			name: "P00010101 010101",
+			wantErr: &UnexpectedTokenError{
+				Value:      "P00010101 010101",
+				Token:      " ",
+				AfterToken: "P00010101",
+				Expected:   "T",
+			},
+		},
+		{
+			name: "P00010101T010101000",
+			wantErr: &UnexpectedTokenError{
+				Value:      "P00010101T010101000",
+				Token:      humanizeDigits(9),
+				AfterToken: "T",
+				Expected:   humanizeDigits(6),
+			},
+		},
+		{
+			name: "X0001-01-01T01:01:01",
+			wantErr: &UnexpectedTokenError{
+				Value:      "X0001-01-01T01:01:01",
+				Token:      "X",
+				AfterToken: "",
+				Expected:   "P",
+			},
+		},
+		{
+			name: "P0001=01-01T01:01:01",
+			wantErr: &UnexpectedTokenError{
+				Value:      "P0001=01-01T01:01:01",
+				Token:      "=",
+				AfterToken: "P0001",
+				Expected:   "-",
+			},
+		},
+		{
+			name: "P0001-001-01T01:01:01",
+			wantErr: &UnexpectedTokenError{
+				Value:      "P0001-001-01T01:01:01",
+				Token:      humanizeDigits(3),
+				AfterToken: "-",
+				Expected:   humanizeDigits(2),
+			},
+		},
+		{
+			name: "P0001-01=01T01:01:01",
+			wantErr: &UnexpectedTokenError{
+				Value:      "P0001-01=01T01:01:01",
+				Token:      "=",
+				AfterToken: "P0001-01",
+				Expected:   "-",
+			},
+		},
+		{
+			name: "P0001-01-001T01:01:01",
+			wantErr: &UnexpectedTokenError{
+				Value:      "P0001-01-001T01:01:01",
+				Token:      humanizeDigits(3),
+				AfterToken: "-",
+				Expected:   humanizeDigits(2),
+			},
+		},
+		{
+			name: "P0001-01-01X01:01:01",
+			wantErr: &UnexpectedTokenError{
+				Value:      "P0001-01-01X01:01:01",
+				Token:      "X",
+				AfterToken: "P0001-01-01",
+				Expected:   "T",
+			},
+		},
+		{
+			name: "P0001-01-01T001:01:01",
+			wantErr: &UnexpectedTokenError{
+				Value:      "P0001-01-01T001:01:01",
+				Token:      humanizeDigits(3),
+				AfterToken: "T",
+				Expected:   humanizeDigits(2),
+			},
+		},
+		{
+			name: "P0001-01-01T01;01:01",
+			wantErr: &UnexpectedTokenError{
+				Value:      "P0001-01-01T01;01:01",
+				Token:      ";",
+				AfterToken: "P0001-01-01T01",
+				Expected:   ":",
+			},
+		},
+		{
+			name: "P0001-01-01T01:001:01",
+			wantErr: &UnexpectedTokenError{
+				Value:      "P0001-01-01T01:001:01",
+				Token:      humanizeDigits(3),
+				AfterToken: ":",
+				Expected:   humanizeDigits(2),
+			},
+		},
+		{
+			name: "P0001-01-01T01:01;01",
+			wantErr: &UnexpectedTokenError{
+				Value:      "P0001-01-01T01:01;01",
+				Token:      ";",
+				AfterToken: "P0001-01-01T01:01",
+				Expected:   ":",
+			},
+		},
+		{
+			name: "P0001-01-01T01:01:001",
+			wantErr: &UnexpectedTokenError{
+				Value:      "P0001-01-01T01:01:001",
+				Token:      humanizeDigits(3),
+				AfterToken: ":",
+				Expected:   humanizeDigits(2),
+			},
+		},
+		{
+			name: "P",
+			wantErr: &UnexpectedTokenError{
+				Value:      "P",
+				Token:      humanizeDigits(0),
+				AfterToken: "P",
+				Expected:   "4-digits or 8-digits",
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := parseAlternativeDuration([]byte(tt.name))
+			if tt.wantErr != nil {
+				if diff := cmp.Diff(tt.wantErr, err); diff != "" {
+					t.Errorf("error: (-want, +got)\n%s", diff)
+				}
+				return
+			}
+			if diff := cmp.Diff(tt.want, got); diff != "" {
+				t.Errorf("(-want, +got)\n%s", diff)
+			}
+		})
+	}
+}
+
+func TestDurationRangeError_Error(t *testing.T) {
+	tests := []struct {
+		name string
+		err  *DurationRangeError
+		want string
+	}{
+		{
+			name: "valid error",
+			err: &DurationRangeError{
+				Element: "hour",
+				Value:   25,
+				Min:     0,
+				Max:     24,
+			},
+			want: "iso8601 duration: 25 hour is not in range 0-24",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.err.Error(); got != tt.want {
+				t.Errorf("DurationRangeError.Error() = %v, want %v", got, tt.want)
 			}
 		})
 	}

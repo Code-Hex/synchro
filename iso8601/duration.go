@@ -8,6 +8,11 @@ import (
 	"time"
 )
 
+const (
+	durationBasicFormat    = "PYYYYMMDDThhmmss"
+	durationExtendedFormat = "PYYYY-MM-DDThh:mm:ss"
+)
+
 // ParseDuration attempts to parse a given byte slice representing a duration in the
 // ISO 8601 format. Supported formats align with the regular expression patterns:
 //
@@ -29,6 +34,15 @@ import (
 //
 // The function returns a Duration structure or an error if the parsing fails.
 func ParseDuration[bytes []byte | ~string](b bytes) (Duration, error) {
+	if len(b) == len(durationBasicFormat) || len(b) == len(durationExtendedFormat) {
+		d, err := parseAlternativeDuration([]byte(b))
+		if err == nil {
+			return d, nil
+		}
+		if err, ok := err.(*DurationRangeError); ok {
+			return Duration{}, err
+		}
+	}
 	return parseDuration([]byte(b))
 }
 
@@ -341,6 +355,206 @@ func parseDuration(b []byte) (Duration, error) {
 	}, nil
 }
 
+// len(PYYYYMMDDThhmmss) => 16
+// len(PYYYY-MM-DDThh:mm:ss) => 20
+func parseAlternativeDuration(b []byte) (Duration, error) {
+	if b[0] != 'P' {
+		return Duration{}, &UnexpectedTokenError{
+			Value:      string(b),
+			Token:      string(b[0]),
+			AfterToken: "",
+			Expected:   "P",
+		}
+	}
+	n := countDigits(b, 1)
+	switch n {
+	case 8: //  PYYYYMMDDThhmmss
+		if b[9] != 'T' {
+			return Duration{}, &UnexpectedTokenError{
+				Value:      string(b),
+				Token:      string(b[9]),
+				AfterToken: string(b[:9]),
+				Expected:   "T",
+			}
+		}
+		if c := countDigits(b, 10); c != 6 {
+			return Duration{}, &UnexpectedTokenError{
+				Value:      string(b),
+				Token:      humanizeDigits(c),
+				AfterToken: "T",
+				Expected:   humanizeDigits(6),
+			}
+		}
+		return newAlternativeDuration(
+			parseNumber(b, 1, 4),  // YYYY
+			parseNumber(b, 5, 2),  // MM
+			parseNumber(b, 7, 2),  // DD
+			parseNumber(b, 10, 2), // hh
+			parseNumber(b, 12, 2), // mm
+			parseNumber(b, 14, 2), // ss
+		)
+	case 4: // PYYYY-MM-DDThh:mm:ss
+		if b[5] != '-' {
+			return Duration{}, &UnexpectedTokenError{
+				Value:      string(b),
+				Token:      string(b[5]),
+				AfterToken: string(b[:5]),
+				Expected:   "-",
+			}
+		}
+		if c := countDigits(b, 6); c != 2 {
+			return Duration{}, &UnexpectedTokenError{
+				Value:      string(b),
+				Token:      humanizeDigits(c),
+				AfterToken: "-",
+				Expected:   humanizeDigits(2),
+			}
+		}
+		if b[8] != '-' {
+			return Duration{}, &UnexpectedTokenError{
+				Value:      string(b),
+				Token:      string(b[8]),
+				AfterToken: string(b[:8]),
+				Expected:   "-",
+			}
+		}
+		if c := countDigits(b, 9); c != 2 {
+			return Duration{}, &UnexpectedTokenError{
+				Value:      string(b),
+				Token:      humanizeDigits(c),
+				AfterToken: "-",
+				Expected:   humanizeDigits(2),
+			}
+		}
+		if b[11] != 'T' {
+			return Duration{}, &UnexpectedTokenError{
+				Value:      string(b),
+				Token:      string(b[11]),
+				AfterToken: string(b[:11]),
+				Expected:   "T",
+			}
+		}
+		if c := countDigits(b, 12); c != 2 {
+			return Duration{}, &UnexpectedTokenError{
+				Value:      string(b),
+				Token:      humanizeDigits(c),
+				AfterToken: "T",
+				Expected:   humanizeDigits(2),
+			}
+		}
+		if b[14] != ':' {
+			return Duration{}, &UnexpectedTokenError{
+				Value:      string(b),
+				Token:      string(b[14]),
+				AfterToken: string(b[:14]),
+				Expected:   ":",
+			}
+		}
+		if c := countDigits(b, 15); c != 2 {
+			return Duration{}, &UnexpectedTokenError{
+				Value:      string(b),
+				Token:      humanizeDigits(c),
+				AfterToken: ":",
+				Expected:   humanizeDigits(2),
+			}
+		}
+		if b[17] != ':' {
+			return Duration{}, &UnexpectedTokenError{
+				Value:      string(b),
+				Token:      string(b[17]),
+				AfterToken: string(b[:17]),
+				Expected:   ":",
+			}
+		}
+		if c := countDigits(b, 18); c != 2 {
+			return Duration{}, &UnexpectedTokenError{
+				Value:      string(b),
+				Token:      humanizeDigits(c),
+				AfterToken: ":",
+				Expected:   humanizeDigits(2),
+			}
+		}
+		return newAlternativeDuration(
+			parseNumber(b, 1, 4),  // YYYY
+			parseNumber(b, 6, 2),  // MM
+			parseNumber(b, 9, 2),  // DD
+			parseNumber(b, 12, 2), // hh
+			parseNumber(b, 15, 2), // mm
+			parseNumber(b, 18, 2), // ss
+		)
+	}
+	return Duration{}, &UnexpectedTokenError{
+		Value:      string(b),
+		Token:      humanizeDigits(n),
+		AfterToken: "P",
+		Expected:   fmt.Sprintf("%s or %s", humanizeDigits(4), humanizeDigits(8)),
+	}
+}
+
+// > However, individual date and time values cannot exceed their moduli
+// (e.g. a value of 13 for the month or 25 for the hour would not be permissible).
+//
+// See: https://en.wikipedia.org/wiki/ISO_8601
+func newAlternativeDuration(
+	year int,
+	month int,
+	day int,
+	hour int,
+	minute int,
+	second int,
+) (Duration, error) {
+	if month < 0 || month > 12 {
+		return Duration{}, &DurationRangeError{
+			Element: "month",
+			Value:   month,
+			Min:     0,
+			Max:     12,
+		}
+	}
+	if day < 0 || day > 31 {
+		return Duration{}, &DurationRangeError{
+			Element: "day",
+			Value:   day,
+			Min:     0,
+			Max:     31,
+		}
+	}
+	if minute < 0 || minute > 59 {
+		return Duration{}, &DurationRangeError{
+			Element: "minute",
+			Value:   minute,
+			Min:     0,
+			Max:     59,
+		}
+	}
+	if second < 0 || second > 59 {
+		return Duration{}, &DurationRangeError{
+			Element: "second",
+			Value:   second,
+			Min:     0,
+			Max:     59,
+		}
+	}
+	if hour < 0 || hour > 23 {
+		if !(hour == 24 && minute == 0 && second == 0) {
+			return Duration{}, &DurationRangeError{
+				Element: "hour",
+				Value:   hour,
+				Min:     0,
+				Max:     24,
+			}
+		}
+	}
+	return Duration{
+		Year:   year,
+		Month:  time.Month(month),
+		Day:    day,
+		Hour:   hour,
+		Minute: minute,
+		Second: second,
+	}, nil
+}
+
 // Duration represents an ISO8601 duration with the maximum precision of nanoseconds.
 // It includes components like years, months, weeks, days, hours, minutes, seconds,
 // milliseconds, microseconds, and nanoseconds. The Negative field indicates whether
@@ -525,4 +739,17 @@ func (d Duration) String() string {
 
 	writeSec(d.Second, nanosec)
 	return b.String()
+}
+
+// DurationRangeError indicates that a value is not in an expected range for Duration.
+type DurationRangeError struct {
+	Element string
+	Value   int
+	Min     int
+	Max     int
+}
+
+// Error implements the error interface.
+func (e *DurationRangeError) Error() string {
+	return fmt.Sprintf("iso8601 duration: %d %s is not in range %d-%d", e.Value, e.Element, e.Min, e.Max)
 }
