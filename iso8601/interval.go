@@ -5,13 +5,25 @@ import (
 	"time"
 )
 
+// Interval represents an ISO8601 time interval.
+// It contains the start and end times, the duration of the interval,
+// and the number of times the interval should be repeated.
 type Interval struct {
-	Start    time.Time
-	End      time.Time
+	// Start represents the start time of the interval.
+	Start time.Time
+
+	// End represents the end time of the interval.
+	End time.Time
+
+	// Duration represents the duration of the interval.
 	Duration Duration
-	Repeat   int
+
+	// Repeat represents the number of times the interval should be repeated. -1 indicates infinity.
+	Repeat int
 }
 
+// ParseInterval parses an ISO8601 time interval from a byte slice or string.
+// It returns the parsed Interval and any error encountered.
 func ParseInterval[bytes []byte | ~string](b bytes) (Interval, error) {
 	return parseInterval([]byte(b))
 }
