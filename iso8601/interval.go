@@ -10,16 +10,66 @@ import (
 // and the number of times the interval should be repeated.
 type Interval struct {
 	// Start represents the start time of the interval.
-	Start time.Time
+	start time.Time
 
 	// End represents the end time of the interval.
-	End time.Time
+	end time.Time
 
 	// Duration represents the duration of the interval.
-	Duration Duration
+	duration Duration
 
 	// Repeat represents the number of times the interval should be repeated. -1 indicates infinity.
-	Repeat int
+	repeat int
+}
+
+// Start returns a time.Time representing the beginning of this interval.
+// If this interval has an explicit End date specified, any existing relative
+// Duration will be cleared.
+//
+// Note: if the interval doesn't include a time component, the start time will
+// actually be zero value (January 1, year 1, 00:00:00 UTC.) of the following
+// day (since the interval covers the entire day). Intervals include the start
+// value (in contrast to the end value).
+func (i Interval) Start() time.Time {
+	if !i.start.IsZero() {
+		return i.start
+	}
+	if !i.end.IsZero() {
+		// Assuming the Duration struct has a method to convert it to time.Duration
+		return i.end.Add(-i.duration.StdDuration())
+	}
+	return time.Time{}
+}
+
+// End returns a time.Time representing the end time of the interval.
+// If this interval has an explicit Start date specified, any existing
+// relative Duration will be cleared.
+//
+// Note: if the interval doesn't include a time component, the end
+// time will actually be zero value (January 1, year 1, 00:00:00 UTC.) of
+// the following day (since the interval covers the entire day).
+func (i Interval) End() time.Time {
+	if !i.end.IsZero() {
+		return i.end
+	}
+	if !i.start.IsZero() {
+		return i.start.Add(i.duration.StdDuration())
+	}
+	return time.Time{}
+}
+
+// Duration returns ISO 8601 duration.
+func (i Interval) Duration() Duration {
+	if !i.duration.IsZero() {
+		return i.duration
+	}
+	return NewDuration(i.end.Sub(i.start))
+}
+
+// Contains returns a boolean indicating whether the provided time.Time
+// is between the Start or End dates as defined by this interval.
+func (i Interval) Contains(t time.Time) bool {
+	return t.Compare(i.Start()) >= 0 && t.Compare(i.End()) <= 0
 }
 
 // ParseInterval parses an ISO8601 time interval from a byte slice or string.
@@ -109,8 +159,8 @@ func parseInterval(b []byte) (Interval, error) {
 			return Interval{}, err
 		}
 		return Interval{
-			Duration: d,
-			Repeat:   repeat,
+			duration: d,
+			repeat:   repeat,
 		}, nil
 	}
 
@@ -130,8 +180,7 @@ func parseInterval(b []byte) (Interval, error) {
 
 	endb := b[len(designator)+designatorIdx:]
 	if endb[0] == 'P' {
-		zero := Duration{}
-		if duration != zero {
+		if !duration.IsZero() {
 			return Interval{}, &UnexpectedTokenError{
 				Value:      string(b),
 				Token:      string(endb),
@@ -153,9 +202,9 @@ func parseInterval(b []byte) (Interval, error) {
 	}
 
 	return Interval{
-		Start:    start,
-		End:      end,
-		Duration: duration,
-		Repeat:   repeat,
+		start:    start,
+		end:      end,
+		duration: duration,
+		repeat:   repeat,
 	}, nil
 }
