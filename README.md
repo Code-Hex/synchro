@@ -10,8 +10,18 @@ This library is inspired by Rust [chrono](https://github.com/chronotope/chrono)
 - Easy conversion between time zones
 - Support for common date and time operations
 - Compatible with the standard `time` package
-- Compatible with [ISO8601](https://en.wikipedia.org/wiki/ISO_8601)
-  - See: [GoDoc](https://pkg.go.dev/github.com/Code-Hex/synchro/iso8601)
+- Full compatible with [ISO8601](https://en.wikipedia.org/wiki/ISO_8601) ([GoDoc](https://pkg.go.dev/github.com/Code-Hex/synchro/iso8601))
+  - ✅ Dates
+    - Years
+    - Calendar dates
+    - Week dates
+    - Quarter dates
+    - Ordinal dates
+  - ✅ Times
+  - ✅ Combined date and time representations
+  - ✅ Durations
+  - ✅ Time intervals
+    - Repeating intervals
 
 ## Installation
 
