@@ -1188,6 +1188,33 @@ func TestParseDuration(t *testing.T) {
 				Expected:   "PnYnMnDTnHnMnS or PnW format",
 			},
 		},
+		{
+			name: "P",
+			wantErr: &UnexpectedTokenError{
+				Value:      "P",
+				Token:      "",
+				AfterToken: "P",
+				Expected:   "PnYnMnDTnHnMnS or PnW format",
+			},
+		},
+		{
+			name: "-P",
+			wantErr: &UnexpectedTokenError{
+				Value:      "-P",
+				Token:      "",
+				AfterToken: "P",
+				Expected:   "PnYnMnDTnHnMnS or PnW format",
+			},
+		},
+		{
+			name: "+P",
+			wantErr: &UnexpectedTokenError{
+				Value:      "+P",
+				Token:      "",
+				AfterToken: "P",
+				Expected:   "PnYnMnDTnHnMnS or PnW format",
+			},
+		},
 		// unexpected fraction
 		{
 			name: "P1.123Y",

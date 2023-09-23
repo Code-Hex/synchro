@@ -95,6 +95,15 @@ func parseDuration(b []byte) (Duration, error) {
 		}
 	}
 
+	if len(b[i:]) == 0 {
+		return Duration{}, &UnexpectedTokenError{
+			Value:      string(b),
+			Token:      "",
+			AfterToken: "P",
+			Expected:   "PnYnMnDTnHnMnS or PnW format",
+		}
+	}
+
 	// Separate because the 'M' designator exists in both date and time.
 	// dateSeen keys will be 'Y', 'M', 'D', 'W'
 	dateSeen := make(map[byte]bool, 3)
