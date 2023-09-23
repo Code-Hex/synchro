@@ -2,6 +2,7 @@ package iso8601
 
 import (
 	"bytes"
+	"fmt"
 	"time"
 )
 
@@ -164,14 +165,17 @@ func parseInterval(b []byte) (Interval, error) {
 		}, nil
 	}
 
-	if b[0] == 'P' {
-		d, err := parseDuration(b[:designatorIdx])
+	startb := b[:designatorIdx]
+	isStartDurationFormat := b[0] == 'P'
+
+	if isStartDurationFormat {
+		d, err := parseDuration(startb)
 		if err != nil {
 			return Interval{}, err
 		}
 		duration = d
 	} else {
-		dt, err := parseDateTime(b[:designatorIdx])
+		dt, err := parseDateTime(startb)
 		if err != nil {
 			return Interval{}, err
 		}
@@ -193,6 +197,12 @@ func parseInterval(b []byte) (Interval, error) {
 			return Interval{}, err
 		}
 		duration = d
+	} else if !isStartDurationFormat && len(startb) > len(endb) {
+		dt, err := parseShortEndDuration(start, endb)
+		if err != nil {
+			return Interval{}, err
+		}
+		end = dt
 	} else {
 		dt, err := parseDateTime(endb)
 		if err != nil {
@@ -207,4 +217,342 @@ func parseInterval(b []byte) (Interval, error) {
 		duration: duration,
 		repeat:   repeat,
 	}, nil
+}
+
+func parseShortEndDuration(start time.Time, b []byte) (time.Time, error) {
+	var (
+		year, m, day         = start.Date()
+		month                = int(m)
+		hour, minute, second = start.Clock()
+	)
+	n := 0
+
+	switch countDigits(b, 0) {
+	case 4:
+		year = parseNumber(b, 0, 4)
+		if len(b) == 4 {
+			return shortEndInterval(start, year, month, day, hour, minute, second)
+		}
+		if b[4] == 'T' {
+			n = 4
+			break
+		}
+		if b[4] != '-' {
+			return time.Time{}, &UnexpectedTokenError{
+				Value:      string(b),
+				Token:      string(b[4]),
+				AfterToken: string(b[:4]),
+				Expected:   "-",
+			}
+		}
+		if c := countDigits(b, 5); c != 2 {
+			return time.Time{}, &UnexpectedTokenError{
+				Value:      string(b),
+				Token:      humanizeDigits(c),
+				AfterToken: string("-"),
+				Expected:   humanizeDigits(2),
+			}
+		}
+		month = parseNumber(b, 5, 2)
+		if len(b) == 7 {
+			return shortEndInterval(start, year, month, day, hour, minute, second)
+		}
+		if b[7] != '-' {
+			return time.Time{}, &UnexpectedTokenError{
+				Value:      string(b),
+				Token:      string(b[7]),
+				AfterToken: string(b[:7]),
+				Expected:   "-",
+			}
+		}
+		if c := countDigits(b, 8); c != 2 {
+			return time.Time{}, &UnexpectedTokenError{
+				Value:      string(b),
+				Token:      humanizeDigits(c),
+				AfterToken: string("-"),
+				Expected:   humanizeDigits(2),
+			}
+		}
+		day = parseNumber(b, 8, 2)
+		if len(b) == 10 {
+			return shortEndInterval(start, year, month, day, hour, minute, second)
+		}
+		n = 10
+	case 2:
+		if len(b) == 2 {
+			day = parseNumber(b, 0, 2)
+			return shortEndInterval(start, year, month, day, hour, minute, second)
+		}
+
+		if b[2] == ':' {
+			hour = parseNumber(b, 0, 2)
+			if c := countDigits(b, 3); c != 2 {
+				return time.Time{}, &UnexpectedTokenError{
+					Value:      string(b),
+					Token:      humanizeDigits(c),
+					AfterToken: string(":"),
+					Expected:   humanizeDigits(2),
+				}
+			}
+			minute = parseNumber(b, 3, 2)
+			if len(b) == 5 {
+				return shortEndInterval(start, year, month, day, hour, minute, second)
+			}
+			if b[5] != ':' {
+				return time.Time{}, &UnexpectedTokenError{
+					Value:      string(b),
+					Token:      string(b[5]),
+					AfterToken: string(b[:5]),
+					Expected:   ":",
+				}
+			}
+			if c := countDigits(b, 6); c != 2 {
+				return time.Time{}, &UnexpectedTokenError{
+					Value:      string(b),
+					Token:      humanizeDigits(c),
+					AfterToken: string(":"),
+					Expected:   humanizeDigits(2),
+				}
+			}
+			second = parseNumber(b, 6, 2)
+			return shortEndInterval(start, year, month, day, hour, minute, second)
+		}
+
+		if b[2] == '-' {
+			month = parseNumber(b, 0, 2)
+			if c := countDigits(b, 3); c != 2 {
+				return time.Time{}, &UnexpectedTokenError{
+					Value:      string(b),
+					Token:      humanizeDigits(c),
+					AfterToken: string("-"),
+					Expected:   humanizeDigits(2),
+				}
+			}
+			day = parseNumber(b, 3, 2)
+			if len(b) == 5 {
+				return shortEndInterval(start, year, month, day, hour, minute, second)
+			}
+			n = 5
+		} else {
+			day = parseNumber(b, 0, 2)
+			n = 2
+		}
+	}
+
+	if b[n] != 'T' {
+		return time.Time{}, &UnexpectedTokenError{
+			Value:      string(b),
+			Token:      string(b[n]),
+			AfterToken: string(b[:n]),
+			Expected:   "T",
+		}
+	}
+
+	n++
+
+	hour = parseNumber(b, n, 2)
+	if c := countDigits(b, n); c != 2 {
+		return time.Time{}, &UnexpectedTokenError{
+			Value:      string(b),
+			Token:      humanizeDigits(c),
+			AfterToken: string("T"),
+			Expected:   humanizeDigits(2),
+		}
+	}
+
+	n += 2
+
+	if len(b) == n {
+		return shortEndInterval(start, year, month, day, hour, minute, second)
+	}
+
+	if b[n] != ':' {
+		return time.Time{}, &UnexpectedTokenError{
+			Value:      string(b),
+			Token:      string(b[n]),
+			AfterToken: string(b[:n]),
+			Expected:   ":",
+		}
+	}
+
+	n++
+
+	if c := countDigits(b, n); c != 2 {
+		return time.Time{}, &UnexpectedTokenError{
+			Value:      string(b),
+			Token:      humanizeDigits(c),
+			AfterToken: string(":"),
+			Expected:   humanizeDigits(2),
+		}
+	}
+
+	minute = parseNumber(b, n, 2)
+
+	n += 2
+
+	if len(b) == n {
+		return shortEndInterval(start, year, month, day, hour, minute, second)
+	}
+
+	if b[n] != ':' {
+		return time.Time{}, &UnexpectedTokenError{
+			Value:      string(b),
+			Token:      string(b[n]),
+			AfterToken: string(b[:n]),
+			Expected:   ":",
+		}
+	}
+
+	n++
+
+	if c := countDigits(b, n); c != 2 {
+		return time.Time{}, &UnexpectedTokenError{
+			Value:      string(b),
+			Token:      humanizeDigits(c),
+			AfterToken: string(":"),
+			Expected:   humanizeDigits(2),
+		}
+	}
+
+	second = parseNumber(b, n, 2)
+	return shortEndInterval(start, year, month, day, hour, minute, second)
+}
+
+func shortEndInterval(
+	start time.Time,
+	years,
+	months,
+	days,
+	hours,
+	minutes,
+	seconds int,
+) (time.Time, error) {
+	var (
+		year, m, day         = start.Date()
+		month                = int(m)
+		hour, minute, second = start.Clock()
+	)
+	if year > years {
+		return time.Time{}, &IntervalRangeError{
+			Element: "year",
+			Value:   years,
+			Min:     year,
+			Max:     9999,
+		}
+	}
+	if year == years && month > months {
+		return time.Time{}, &IntervalRangeError{
+			Element: "month",
+			Value:   months,
+			Min:     month,
+			Max:     12,
+		}
+	}
+	if err := validateIntervalDate(years, months, day); err != nil {
+		if year == years {
+			err.Min = month
+		}
+		return time.Time{}, err
+	}
+	if month == months && day > days {
+		return time.Time{}, &IntervalRangeError{
+			Element: "day of month",
+			Value:   days,
+			Min:     day,
+			Max:     daysInMonth(year, month),
+		}
+	}
+	if err := validateIntervalDate(years, months, days); err != nil {
+		if year == years && month == months {
+			err.Min = day
+		}
+		return time.Time{}, err
+	}
+
+	if hour > hours {
+		return time.Time{}, &IntervalRangeError{
+			Element: "hour",
+			Value:   hours,
+			Min:     hour,
+			Max:     24,
+		}
+	}
+	if err := validateIntervalTime(hours, minute, second); err != nil {
+		err.Min = hour
+		return time.Time{}, err
+	}
+	if hour == hours && minute > minutes {
+		return time.Time{}, &IntervalRangeError{
+			Element: "minute",
+			Value:   minutes,
+			Min:     minute,
+			Max:     59,
+		}
+	}
+	if err := validateIntervalTime(hours, minutes, second); err != nil {
+		err.Min = minute
+		return time.Time{}, err
+	}
+	if hour == hours && minute == minutes && second > seconds {
+		return time.Time{}, &IntervalRangeError{
+			Element: "second",
+			Value:   seconds,
+			Min:     second,
+			Max:     59,
+		}
+	}
+	if err := validateIntervalTime(hours, minutes, seconds); err != nil {
+		err.Min = second
+		return time.Time{}, err
+	}
+	return time.Date(years, time.Month(months), days, hours, minutes, seconds, start.Nanosecond(), time.UTC), nil
+}
+
+func validateIntervalDate(year, month, day int) *IntervalRangeError {
+	d := Date{
+		Year:  year,
+		Month: time.Month(month),
+		Day:   day,
+	}
+	err := d.Validate()
+	if v, ok := err.(*DateLikeRangeError); ok && v != nil {
+		return &IntervalRangeError{
+			Element: v.Element,
+			Value:   v.Value,
+			Min:     v.Min,
+			Max:     v.Max,
+		}
+	}
+	return nil
+}
+
+func validateIntervalTime(hour, minute, second int) *IntervalRangeError {
+	t := Time{
+		Hour:   hour,
+		Minute: minute,
+		Second: second,
+	}
+	err := t.Validate()
+	if v, ok := err.(*TimeRangeError); ok && v != nil {
+		return &IntervalRangeError{
+			Element: v.Element,
+			Value:   v.Value,
+			Min:     v.Min,
+			Max:     v.Max,
+		}
+	}
+	return nil
+}
+
+// IntervalRangeError indicates that a value is not in an expected range for time interval.
+type IntervalRangeError struct {
+	Element string
+	Value   int
+	Min     int
+	Max     int
+}
+
+// Error implements the error interface.
+func (e *IntervalRangeError) Error() string {
+	return fmt.Sprintf("iso8601 time interval: %d %s is not in range %d-%d", e.Value, e.Element, e.Min, e.Max)
 }

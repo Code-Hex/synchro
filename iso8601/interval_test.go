@@ -92,6 +92,118 @@ func TestParseInterval(t *testing.T) {
 			},
 		},
 		{
+			name: "2007-03-01T13:00:00Z/2008",
+			want: Interval{
+				start: time.Date(2007, 3, 1, 13, 0, 0, 0, time.UTC),
+				end:   time.Date(2008, 3, 1, 13, 0, 0, 0, time.UTC),
+			},
+		},
+		{
+			name: "2007-03-01T13:00:00Z/15",
+			want: Interval{
+				start: time.Date(2007, 3, 1, 13, 0, 0, 0, time.UTC),
+				end:   time.Date(2007, 3, 15, 13, 0, 0, 0, time.UTC),
+			},
+		},
+		{
+			name: "2007-03-01T13:00:00Z/04-15",
+			want: Interval{
+				start: time.Date(2007, 3, 1, 13, 0, 0, 0, time.UTC),
+				end:   time.Date(2007, 4, 15, 13, 0, 0, 0, time.UTC),
+			},
+		},
+		{
+			name: "2007-03-01T13:00:00Z/2008-04-15",
+			want: Interval{
+				start: time.Date(2007, 3, 1, 13, 0, 0, 0, time.UTC),
+				end:   time.Date(2008, 4, 15, 13, 0, 0, 0, time.UTC),
+			},
+		},
+		{
+			name: "2007-03-01T13:00:00Z/2008-04",
+			want: Interval{
+				start: time.Date(2007, 3, 1, 13, 0, 0, 0, time.UTC),
+				end:   time.Date(2008, 4, 1, 13, 0, 0, 0, time.UTC),
+			},
+		},
+		{
+			name: "2007-03-01T13:00:00Z/15T17",
+			want: Interval{
+				start: time.Date(2007, 3, 1, 13, 0, 0, 0, time.UTC),
+				end:   time.Date(2007, 3, 15, 17, 0, 0, 0, time.UTC),
+			},
+		},
+		{
+			name: "2007-03-01T13:00:00Z/15T17:30",
+			want: Interval{
+				start: time.Date(2007, 3, 1, 13, 0, 0, 0, time.UTC),
+				end:   time.Date(2007, 3, 15, 17, 30, 0, 0, time.UTC),
+			},
+		},
+		{
+			name: "2007-03-01T13:00:00Z/17:30",
+			want: Interval{
+				start: time.Date(2007, 3, 1, 13, 0, 0, 0, time.UTC),
+				end:   time.Date(2007, 3, 1, 17, 30, 0, 0, time.UTC),
+			},
+		},
+		{
+			name: "2007-03-01T13:00:00Z/17:30:30",
+			want: Interval{
+				start: time.Date(2007, 3, 1, 13, 0, 0, 0, time.UTC),
+				end:   time.Date(2007, 3, 1, 17, 30, 30, 0, time.UTC),
+			},
+		},
+		{
+			name: "2007-03-01T13:00:00Z/2008T17",
+			want: Interval{
+				start: time.Date(2007, 3, 1, 13, 0, 0, 0, time.UTC),
+				end:   time.Date(2008, 3, 1, 17, 00, 0, 0, time.UTC),
+			},
+		},
+		{
+			name: "2007-03-01T13:00:00Z/2008-04-15T17",
+			want: Interval{
+				start: time.Date(2007, 3, 1, 13, 0, 0, 0, time.UTC),
+				end:   time.Date(2008, 4, 15, 17, 00, 0, 0, time.UTC),
+			},
+		},
+		{
+			name: "2007-03-01T13:00:00Z/15T17",
+			want: Interval{
+				start: time.Date(2007, 3, 1, 13, 0, 0, 0, time.UTC),
+				end:   time.Date(2007, 3, 15, 17, 00, 0, 0, time.UTC),
+			},
+		},
+		{
+			name: "2007-03-01T13:00:00Z/04-15T17",
+			want: Interval{
+				start: time.Date(2007, 3, 1, 13, 0, 0, 0, time.UTC),
+				end:   time.Date(2007, 4, 15, 17, 00, 0, 0, time.UTC),
+			},
+		},
+		{
+			name: "2007-03-01T13:00:00Z/T17",
+			want: Interval{
+				start: time.Date(2007, 3, 1, 13, 0, 0, 0, time.UTC),
+				end:   time.Date(2007, 3, 1, 17, 00, 0, 0, time.UTC),
+			},
+		},
+		{
+			name: "2007-03-01T13:00:00Z/T17:30",
+			want: Interval{
+				start: time.Date(2007, 3, 1, 13, 0, 0, 0, time.UTC),
+				end:   time.Date(2007, 3, 1, 17, 30, 0, 0, time.UTC),
+			},
+		},
+		{
+			name: "2007-03-01T13:00:00Z/T17:30:30",
+			want: Interval{
+				start: time.Date(2007, 3, 1, 13, 0, 0, 0, time.UTC),
+				end:   time.Date(2007, 3, 1, 17, 30, 30, 0, time.UTC),
+			},
+		},
+		{
 			name: "R3/2007-03-01T13:00:00Z/2008-05-11T15:30:00Z",
 			want: Interval{
 				start:  time.Date(2007, 3, 1, 13, 0, 0, 0, time.UTC),
@@ -348,6 +460,305 @@ func TestParseInterval(t *testing.T) {
 				Expected:   "P or + or -",
 			},
 		},
+		// invalid short format at end part
+		{
+			name: "2007-03-01T13:00:00Z/2008+",
+			wantErr: &UnexpectedTokenError{
+				Value:      "2008+",
+				Token:      "+",
+				AfterToken: "2008",
+				Expected:   "-",
+			},
+		},
+		{
+			name: "2007-03-01T13:00:00Z/2008-1",
+			wantErr: &UnexpectedTokenError{
+				Value:      "2008-1",
+				Token:      humanizeDigits(1),
+				AfterToken: "-",
+				Expected:   humanizeDigits(2),
+			},
+		},
+		{
+			name: "2007-03-01T13:00:00Z/2008-01+",
+			wantErr: &UnexpectedTokenError{
+				Value:      "2008-01+",
+				Token:      "+",
+				AfterToken: "2008-01",
+				Expected:   "-",
+			},
+		},
+		{
+			name: "2007-03-01T13:00:00Z/2008-01-123",
+			wantErr: &UnexpectedTokenError{
+				Value:      "2008-01-123",
+				Token:      humanizeDigits(3),
+				AfterToken: "-",
+				Expected:   humanizeDigits(2),
+			},
+		},
+		{
+			name: "2007-03-01T13:00:00Z/14:123",
+			wantErr: &UnexpectedTokenError{
+				Value:      "14:123",
+				Token:      humanizeDigits(3),
+				AfterToken: ":",
+				Expected:   humanizeDigits(2),
+			},
+		},
+		{
+			name: "2007-03-01T13:00:00Z/14:12?",
+			wantErr: &UnexpectedTokenError{
+				Value:      "14:12?",
+				Token:      "?",
+				AfterToken: "14:12",
+				Expected:   ":",
+			},
+		},
+		{
+			name: "2007-03-01T13:00:00Z/14:12:123",
+			wantErr: &UnexpectedTokenError{
+				Value:      "14:12:123",
+				Token:      humanizeDigits(3),
+				AfterToken: ":",
+				Expected:   humanizeDigits(2),
+			},
+		},
+		{
+			name: "2007-03-01T13:00:00Z/01-123",
+			wantErr: &UnexpectedTokenError{
+				Value:      "01-123",
+				Token:      humanizeDigits(3),
+				AfterToken: "-",
+				Expected:   humanizeDigits(2),
+			},
+		},
+		{
+			name: "2007-03-01T13:00:00Z/X14:00",
+			wantErr: &UnexpectedTokenError{
+				Value:      "X14:00",
+				Token:      "X",
+				AfterToken: "",
+				Expected:   "T",
+			},
+		},
+		{
+			name: "2007-03-01T13:00:00Z/T143",
+			wantErr: &UnexpectedTokenError{
+				Value:      "T143",
+				Token:      humanizeDigits(3),
+				AfterToken: "T",
+				Expected:   humanizeDigits(2),
+			},
+		},
+		{
+			name: "2007-03-01T13:00:00Z/T14+32",
+			wantErr: &UnexpectedTokenError{
+				Value:      "T14+32",
+				Token:      "+",
+				AfterToken: "T14",
+				Expected:   ":",
+			},
+		},
+		{
+			name: "2007-03-01T13:00:00Z/T14:321",
+			wantErr: &UnexpectedTokenError{
+				Value:      "T14:321",
+				Token:      humanizeDigits(3),
+				AfterToken: ":",
+				Expected:   humanizeDigits(2),
+			},
+		},
+		{
+			name: "2007-03-01T13:00:00Z/T14:32+43",
+			wantErr: &UnexpectedTokenError{
+				Value:      "T14:32+43",
+				Token:      "+",
+				AfterToken: "T14:32",
+				Expected:   ":",
+			},
+		},
+		{
+			name: "2007-03-01T13:00:00Z/T14:32:432",
+			wantErr: &UnexpectedTokenError{
+				Value:      "T14:32:432",
+				Token:      humanizeDigits(3),
+				AfterToken: ":",
+				Expected:   humanizeDigits(2),
+			},
+		},
+		// invalid interval range
+		{
+			name: "2007-03-01T13:00:00Z/2006",
+			wantErr: &IntervalRangeError{
+				Element: "year",
+				Value:   2006,
+				Min:     2007,
+				Max:     9999,
+			},
+		},
+		{
+			name: "2007-03-01T13:00:00Z/2006",
+			wantErr: &IntervalRangeError{
+				Element: "year",
+				Value:   2006,
+				Min:     2007,
+				Max:     9999,
+			},
+		},
+		{
+			name: "2007-03-01T13:00:00Z/2008-13",
+			wantErr: &IntervalRangeError{
+				Element: "month",
+				Value:   13,
+				Min:     1,
+				Max:     12,
+			},
+		},
+		{
+			name: "2007-03-01T13:00:00Z/2008-00",
+			wantErr: &IntervalRangeError{
+				Element: "month",
+				Value:   0,
+				Min:     1,
+				Max:     12,
+			},
+		},
+		{
+			name: "2007-03-01T13:00:00Z/02-01",
+			wantErr: &IntervalRangeError{
+				Element: "month",
+				Value:   2,
+				Min:     3,
+				Max:     12,
+			},
+		},
+		{
+			name: "2007-03-01T13:00:00Z/13-01",
+			wantErr: &IntervalRangeError{
+				Element: "month",
+				Value:   13,
+				Min:     3,
+				Max:     12,
+			},
+		},
+		{
+			name: "2007-03-01T13:00:00Z/2008-01-32",
+			wantErr: &IntervalRangeError{
+				Element: "day of month",
+				Value:   32,
+				Min:     1,
+				Max:     31,
+			},
+		},
+		{
+			name: "2007-03-01T13:00:00Z/2008-01-00",
+			wantErr: &IntervalRangeError{
+				Element: "day of month",
+				Value:   0,
+				Min:     1,
+				Max:     31,
+			},
+		},
+		{
+			name: "2007-03-01T13:00:00Z/25:00",
+			wantErr: &IntervalRangeError{
+				Element: "hour",
+				Value:   25,
+				Min:     13,
+				Max:     24,
+			},
+		},
+		{
+			name: "2007-03-01T13:00:00Z/12:00",
+			wantErr: &IntervalRangeError{
+				Element: "hour",
+				Value:   12,
+				Min:     13,
+				Max:     24,
+			},
+		},
+		{
+			name: "2007-03-01T13:00:00Z/23:60",
+			wantErr: &IntervalRangeError{
+				Element: "minute",
+				Value:   60,
+				Min:     0,
+				Max:     59,
+			},
+		},
+		{
+			name: "2007-03-01T13:11:00Z/13:00",
+			wantErr: &IntervalRangeError{
+				Element: "minute",
+				Value:   0,
+				Min:     11,
+				Max:     59,
+			},
+		},
+		{
+			name: "2007-03-01T13:00:00Z/23:59:60",
+			wantErr: &IntervalRangeError{
+				Element: "second",
+				Value:   60,
+				Min:     0,
+				Max:     59,
+			},
+		},
+		{
+			name: "2007-03-01T13:11:30Z/13:11:29",
+			wantErr: &IntervalRangeError{
+				Element: "second",
+				Value:   29,
+				Min:     30,
+				Max:     59,
+			},
+		},
+		{
+			name: "2007-03-01T13:00:00Z/32",
+			wantErr: &IntervalRangeError{
+				Element: "day of month",
+				Value:   32,
+				Min:     1,
+				Max:     31,
+			},
+		},
+		{
+			name: "2007-03-02T13:00:00Z/01",
+			wantErr: &IntervalRangeError{
+				Element: "day of month",
+				Value:   1,
+				Min:     2,
+				Max:     31,
+			},
+		},
+		{
+			name: "2007-03-02T13:00:00Z/03-01",
+			wantErr: &IntervalRangeError{
+				Element: "day of month",
+				Value:   1,
+				Min:     2,
+				Max:     31,
+			},
+		},
+		{
+			name: "2007-03-02T13:00:00Z/03-01",
+			wantErr: &IntervalRangeError{
+				Element: "day of month",
+				Value:   1,
+				Min:     2,
+				Max:     31,
+			},
+		},
+		{
+			name: "2007-03-01T13:00:00Z/T12",
+			wantErr: &IntervalRangeError{
+				Element: "hour",
+				Value:   12,
+				Min:     13,
+				Max:     24,
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -537,6 +948,33 @@ func TestInterval_Duration(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			if got := tc.interval.Duration(); got != tc.expected {
 				t.Errorf("Expected duration %v, but got %v", tc.expected, got)
+			}
+		})
+	}
+}
+
+func TestIntervalRangeError_Error(t *testing.T) {
+	tests := []struct {
+		name string
+		err  *IntervalRangeError
+		want string
+	}{
+		{
+			name: "valid error",
+			err: &IntervalRangeError{
+				Element: "month",
+				Value:   13,
+				Min:     1,
+				Max:     12,
+			},
+			want: "iso8601 time interval: 13 month is not in range 1-12",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.err.Error(); got != tt.want {
+				t.Errorf("IntervalRangeError.Error() = %v, want %v", got, tt.want)
 			}
 		})
 	}
