@@ -6,6 +6,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/Code-Hex/synchro/internal/constraints"
 )
 
 const (
@@ -33,7 +35,7 @@ const (
 // or -P1M for interoperability, be aware that other programs may not recognize it.
 //
 // The function returns a Duration structure or an error if the parsing fails.
-func ParseDuration[bytes []byte | ~string](b bytes) (Duration, error) {
+func ParseDuration[bytes constraints.Bytes](b bytes) (Duration, error) {
 	if len(b) == len(durationBasicFormat) || len(b) == len(durationExtendedFormat) {
 		d, err := parseAlternativeDuration([]byte(b))
 		if err == nil {

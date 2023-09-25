@@ -5,6 +5,8 @@ import (
 	"math"
 	"strconv"
 	"time"
+
+	"github.com/Code-Hex/synchro/internal/constraints"
 )
 
 // NOTE(codehex): "math.MaxInt == 9223372036854775807" has 19 digits.
@@ -42,7 +44,7 @@ func parseNumber(b []byte, start, width int) (v int) {
 //	2012Q485        2012-Q4-85    Quarter date
 //
 // The function returns an implementation of DateLike or an error if the parsing fails.
-func ParseDate[bytes []byte | ~string](b bytes) (DateLike, error) {
+func ParseDate[bytes constraints.Bytes](b bytes) (DateLike, error) {
 	n, d, err := parseDate([]byte(b))
 	if err != nil {
 		return nil, err
