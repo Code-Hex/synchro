@@ -2,6 +2,8 @@ package iso8601
 
 import (
 	"fmt"
+
+	"github.com/Code-Hex/synchro/internal/constraints"
 )
 
 // Zone represents an ISO8601-compliant timezone offset, specified by its hour, minute, and second components.
@@ -84,7 +86,7 @@ func (e *TimeZoneRangeError) Error() string {
 //	±hhmmss     ±hh:mm:ss
 //
 // The function returns a Zone structure or an error if the parsing fails.
-func ParseZone[bytes []byte | ~string](b bytes) (Zone, error) {
+func ParseZone[bytes constraints.Bytes](b bytes) (Zone, error) {
 	if len(b) > 3 && b[3] == ':' {
 		return parseExtendedZone([]byte(b))
 	}

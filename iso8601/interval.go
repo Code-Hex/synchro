@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"fmt"
 	"time"
+
+	"github.com/Code-Hex/synchro/internal/constraints"
 )
 
 // Interval represents an ISO8601 time interval.
@@ -75,7 +77,7 @@ func (i Interval) Contains(t time.Time) bool {
 
 // ParseInterval parses an ISO8601 time interval from a byte slice or string.
 // It returns the parsed Interval and any error encountered.
-func ParseInterval[bytes []byte | ~string](b bytes) (Interval, error) {
+func ParseInterval[bytes constraints.Bytes](b bytes) (Interval, error) {
 	return parseInterval([]byte(b))
 }
 

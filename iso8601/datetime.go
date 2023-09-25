@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	"github.com/Code-Hex/synchro/internal/constraints"
 )
 
 var defaultParseDateTimeOptions = parseDateTimeOptions{
@@ -65,7 +67,7 @@ func WithInLocation(loc *time.Location) ParseDateTimeOptions {
 // being in a fabricated location with time fixed at the given zone offset.
 //
 // If parsing fails, an error is returned.
-func ParseDateTime[bytes []byte | ~string](b bytes, opts ...ParseDateTimeOptions) (time.Time, error) {
+func ParseDateTime[bytes constraints.Bytes](b bytes, opts ...ParseDateTimeOptions) (time.Time, error) {
 	return parseDateTime([]byte(b), opts...)
 }
 

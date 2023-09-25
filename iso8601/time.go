@@ -3,6 +3,8 @@ package iso8601
 import (
 	"fmt"
 	"math"
+
+	"github.com/Code-Hex/synchro/internal/constraints"
 )
 
 // Time represents an ISO8601-compliant time without a date, specified by its hour, minute, second, and nanosecond.
@@ -90,7 +92,7 @@ func (e *TimeRangeError) Error() string {
 //	123045,123456789   12:30:45,123456789
 //
 // The function returns a Time structure or an error if the parsing fails.
-func ParseTime[bytes []byte | ~string](b bytes) (Time, error) {
+func ParseTime[bytes constraints.Bytes](b bytes) (Time, error) {
 	n, t, err := parseTime([]byte(b))
 	if err != nil {
 		return Time{}, err
