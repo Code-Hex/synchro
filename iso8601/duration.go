@@ -589,6 +589,21 @@ const monthInSecond = 2630016 * time.Second // 30.44 days * 3600 * 24 seconds
 const weekInSecond = 7 * dayInSecond
 const dayInSecond = 24 * 3600 * time.Second
 
+// StdClockDuration converts an ISO8601 Duration to a standard Go time.Duration.
+// The conversion is calculated using hours, minutes, seconds, milliseconds, microseconds and nanoseconds.
+func (d Duration) StdClockDuration() time.Duration {
+	duration := time.Duration(d.Hour)*time.Hour +
+		time.Duration(d.Minute)*time.Minute +
+		time.Duration(d.Second)*time.Second +
+		time.Duration(d.Millisecond)*time.Millisecond +
+		time.Duration(d.Microsecond)*time.Microsecond +
+		time.Duration(d.Nanosecond)
+	if d.Negative {
+		duration = -duration
+	}
+	return time.Duration(duration)
+}
+
 // StdDuration converts the ISO8601 Duration to a standard Go time.Duration.
 // Note: This conversion is an approximation. The duration of some components
 // like years and months are averaged based on typical values:
