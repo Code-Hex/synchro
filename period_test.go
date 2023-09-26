@@ -52,7 +52,28 @@ func TestPeriod_Slice(t *testing.T) {
 			t.Fatalf("(-want, +got)\n%s", diff)
 		}
 	})
+	t.Run("alternative string params", func(t *testing.T) {
+		type XString string
+		period, err := CreatePeriod[tz.UTC](XString("2014-02-05"), XString("2014-02-08"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		got := period.Slice()
+		if diff := cmp.Diff(want, got); diff != "" {
+			t.Fatalf("(-want, +got)\n%s", diff)
+		}
+	})
 	t.Run("[]byte params", func(t *testing.T) {
+		period, err := CreatePeriod[tz.UTC]([]byte("2014-02-05"), []byte("2014-02-08"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		got := period.Slice()
+		if diff := cmp.Diff(want, got); diff != "" {
+			t.Fatalf("(-want, +got)\n%s", diff)
+		}
+	})
+	t.Run("alternative []byte params", func(t *testing.T) {
 		period, err := CreatePeriod[tz.UTC]([]byte("2014-02-05"), []byte("2014-02-08"))
 		if err != nil {
 			t.Fatal(err)
