@@ -2,7 +2,6 @@ package synchro
 
 import (
 	"fmt"
-	"log"
 	"reflect"
 	"time"
 
@@ -62,7 +61,6 @@ func (iter *periodIterator[T]) Next() bool {
 		return true
 	}
 	iter.current = iter.current.Add(iter.period.duration)
-	log.Println(iter.period.end)
 	return iter.current.Compare(iter.period.end) <= 0
 }
 
