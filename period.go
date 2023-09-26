@@ -107,23 +107,25 @@ func (p Period[T]) PeriodicISODuration(duration string) (periodical[T], error) {
 		sign = -1
 	}
 	return p.Periodic(func(t Time[T]) Time[T] {
-		units := []unit{}
+		var (
+			years  int
+			months int
+			days   int
+		)
+
 		if d.Year > 0 {
-			units = append(units, Year(sign*d.Year))
+			years = sign * d.Year
 		}
 		if d.Month > 0 {
-			units = append(units, Month(sign*int(d.Month)))
+			months = sign * int(d.Month)
 		}
 		if d.Week > 0 {
-			units = append(units, Day(sign*7*d.Week))
+			days += sign * 7 * d.Week
 		}
 		if d.Day > 0 {
-			units = append(units, Day(sign*d.Day))
+			days += sign * d.Day
 		}
-		if len(units) > 0 {
-			t = t.Advance(units[0], units[1:]...)
-		}
-		return t.Add(d.StdClockDuration())
+		return t.AddDate(years, months, days).Add(d.StdClockDuration())
 	}), nil
 }
 
