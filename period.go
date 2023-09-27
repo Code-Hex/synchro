@@ -7,6 +7,7 @@ import (
 
 	"github.com/Code-Hex/synchro/internal/constraints"
 	"github.com/Code-Hex/synchro/iso8601"
+	"github.com/Code-Hex/synchro/tz"
 )
 
 type timeish[T TimeZone] interface {
@@ -20,6 +21,15 @@ var stringType = reflect.TypeOf("")
 type Period[T TimeZone] struct {
 	start Time[T]
 	end   Time[T]
+}
+
+var _ interface {
+	fmt.Stringer
+} = (*Period[tz.UTC])(nil)
+
+// String implements the fmt.Stringer interface.
+func (p Period[T]) String() string {
+	return fmt.Sprintf("from %s to %s", p.start, p.end)
 }
 
 // NewPeriod creates a new Period struct between the 'from' and 'to' values you specified.
@@ -104,7 +114,7 @@ func (p Period[T]) PeriodicDate(years int, months int, days int) periodical[T] {
 }
 
 // PeriodicAdvance is a wrapper for the Periodic function.
-// The interval is specified by the provided unit arguments.
+// The interval is specified by the provided date and time unit arguments.
 func (p Period[T]) PeriodicAdvance(u1 unit, u2 ...unit) periodical[T] {
 	return p.Periodic(func(t Time[T]) Time[T] {
 		return t.Advance(u1, u2...)
