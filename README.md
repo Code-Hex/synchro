@@ -88,6 +88,7 @@ If you have a feature request, please open an issue. It would be great if you co
   - `Change` allows you to specify the date and time components you want to change and make modifications.
 - [Advance](https://pkg.go.dev/github.com/Code-Hex/synchro#Time.Advance)
   - `Advance` allows you to specify the date and time components you want to increment and make modifications.
+- [Period](https://pkg.go.dev/github.com/Code-Hex/synchro#Period)
 
 
 ## TODO
