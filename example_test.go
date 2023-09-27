@@ -407,13 +407,20 @@ func ExampleNewPeriod() {
 		"2009-01-01",
 		[]byte("2009-01-10T23:59:59Z"),
 	)
+	// Reverse
+	p4, _ := synchro.NewPeriod[tz.UTC](
+		"2009-01-10T23:59:59",
+		"2009-01-01",
+	)
 	fmt.Printf("p1: %s\n", p1)
 	fmt.Printf("p2: %s\n", p2)
 	fmt.Printf("p3: %s\n", p3)
+	fmt.Printf("p4: %s\n", p4)
 	// Output:
 	// p1: from 2009-01-01 00:00:00 +0000 UTC to 2009-01-10 23:59:59 +0000 UTC
 	// p2: from 2009-01-01 00:00:00 +0000 UTC to 2009-01-10 23:59:59 +0000 UTC
 	// p3: from 2009-01-01 00:00:00 +0000 UTC to 2009-01-10 23:59:59 +0000 UTC
+	// p4: from 2009-01-10 23:59:59 +0000 UTC to 2009-01-01 00:00:00 +0000 UTC
 }
 
 func ExamplePeriod_PeriodicDuration() {
