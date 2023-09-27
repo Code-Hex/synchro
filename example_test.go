@@ -390,3 +390,113 @@ func ExampleAfter() {
 	}
 	// Output: timed out
 }
+
+func ExampleNewPeriod() {
+	// with synchro.Time params
+	p1, _ := synchro.NewPeriod[tz.UTC](
+		synchro.New[tz.UTC](2009, 1, 1, 0, 0, 0, 0),
+		synchro.New[tz.UTC](2009, 1, 10, 23, 59, 59, 0),
+	)
+	// with time.Time params
+	p2, _ := synchro.NewPeriod[tz.UTC](
+		time.Date(2009, 1, 1, 0, 0, 0, 0, time.UTC),
+		time.Date(2009, 1, 10, 23, 59, 59, 0, time.UTC),
+	)
+	// with ISO 8601 date and time format string or bytes
+	p3, _ := synchro.NewPeriod[tz.UTC](
+		"2009-01-01",
+		[]byte("2009-01-10T23:59:59Z"),
+	)
+	// Reverse
+	p4, _ := synchro.NewPeriod[tz.UTC](
+		"2009-01-10T23:59:59",
+		"2009-01-01",
+	)
+	fmt.Printf("p1: %s\n", p1)
+	fmt.Printf("p2: %s\n", p2)
+	fmt.Printf("p3: %s\n", p3)
+	fmt.Printf("p4: %s\n", p4)
+	// Output:
+	// p1: from 2009-01-01 00:00:00 +0000 UTC to 2009-01-10 23:59:59 +0000 UTC
+	// p2: from 2009-01-01 00:00:00 +0000 UTC to 2009-01-10 23:59:59 +0000 UTC
+	// p3: from 2009-01-01 00:00:00 +0000 UTC to 2009-01-10 23:59:59 +0000 UTC
+	// p4: from 2009-01-10 23:59:59 +0000 UTC to 2009-01-01 00:00:00 +0000 UTC
+}
+
+func ExamplePeriod_PeriodicDuration() {
+	p1, _ := synchro.NewPeriod[tz.UTC](
+		"2009-01-01",
+		synchro.New[tz.UTC](2009, 1, 1, 3, 59, 59, 0),
+	)
+	for current := range p1.PeriodicDuration(time.Hour) {
+		fmt.Println(current)
+	}
+	// Output:
+	// 2009-01-01 00:00:00 +0000 UTC
+	// 2009-01-01 01:00:00 +0000 UTC
+	// 2009-01-01 02:00:00 +0000 UTC
+	// 2009-01-01 03:00:00 +0000 UTC
+}
+
+func ExamplePeriod_PeriodicDate() {
+	p1, _ := synchro.NewPeriod[tz.UTC](
+		"2009-01-01",
+		"2009-01-03",
+	)
+	for current := range p1.PeriodicDate(0, 0, 1) {
+		fmt.Println(current)
+	}
+	// Output:
+	// 2009-01-01 00:00:00 +0000 UTC
+	// 2009-01-02 00:00:00 +0000 UTC
+	// 2009-01-03 00:00:00 +0000 UTC
+}
+
+func ExamplePeriod_PeriodicAdvance() {
+	p1, _ := synchro.NewPeriod[tz.UTC](
+		"2009-01-01",
+		time.Date(2013, 1, 3, 0, 0, 0, 0, time.UTC),
+	)
+	for current := range p1.PeriodicAdvance(synchro.Year(1), synchro.Day(1)) {
+		fmt.Println(current)
+	}
+	// Output:
+	// 2009-01-01 00:00:00 +0000 UTC
+	// 2010-01-02 00:00:00 +0000 UTC
+	// 2011-01-03 00:00:00 +0000 UTC
+	// 2012-01-04 00:00:00 +0000 UTC
+}
+
+func ExamplePeriod_PeriodicISODuration() {
+	p1, _ := synchro.NewPeriod[tz.UTC](
+		"2009-01-01",
+		"2009-03-01",
+	)
+	iter, _ := p1.PeriodicISODuration("P1M")
+	for current := range iter {
+		fmt.Println(current)
+	}
+	// Output:
+	// 2009-01-01 00:00:00 +0000 UTC
+	// 2009-02-01 00:00:00 +0000 UTC
+	// 2009-03-01 00:00:00 +0000 UTC
+}
+
+func ExamplePeriod_periodicalSlice() {
+	p1, _ := synchro.NewPeriod[tz.UTC](
+		"2009-01-01T00:00:00",
+		"2009-01-01T03:00:00",
+	)
+
+	got := p1.PeriodicDuration(time.Hour).Slice()
+	fmt.Println("len:", len(got))
+	for _, current := range got {
+		fmt.Println(current)
+	}
+	// Output:
+	// len: 4
+	// 2009-01-01 00:00:00 +0000 UTC
+	// 2009-01-01 01:00:00 +0000 UTC
+	// 2009-01-01 02:00:00 +0000 UTC
+	// 2009-01-01 03:00:00 +0000 UTC
+}

@@ -1,0 +1,186 @@
+package synchro
+
+import (
+	"fmt"
+	"reflect"
+	"time"
+
+	"github.com/Code-Hex/synchro/internal/constraints"
+	"github.com/Code-Hex/synchro/iso8601"
+	"github.com/Code-Hex/synchro/tz"
+)
+
+type timeish[T TimeZone] interface {
+	Time[T] | time.Time | constraints.Bytes
+}
+
+var stringType = reflect.TypeOf("")
+
+// Period allows iteration over a set of dates and times,
+// recurring at regular intervals, over a given period.
+type Period[T TimeZone] struct {
+	start Time[T]
+	end   Time[T]
+}
+
+var _ interface {
+	fmt.Stringer
+} = (*Period[tz.UTC])(nil)
+
+// String implements the fmt.Stringer interface.
+func (p Period[T]) String() string {
+	return fmt.Sprintf("from %s to %s", p.start, p.end)
+}
+
+// NewPeriod creates a new Period struct between the 'from' and 'to' values you specified.
+//
+// If Time[T] or time.Time is specified, it guarantees no error returns.
+// When a string or []byte is passed, ParseISO function is called internally. Therefore, these
+// parameters should be in a format compatible with ParseISO.
+func NewPeriod[T TimeZone, T1 timeish[T], T2 timeish[T]](from T1, to T2) (Period[T], error) {
+	start, err := convertTime[T](any(from))
+	if err != nil {
+		return Period[T]{}, fmt.Errorf("failed to parse from: %w", err)
+	}
+	end, err := convertTime[T](any(to))
+	if err != nil {
+		return Period[T]{}, fmt.Errorf("failed to parse to: %w", err)
+	}
+	return Period[T]{
+		start: start,
+		end:   end,
+	}, nil
+}
+
+type periodical[T TimeZone] <-chan Time[T]
+
+// Slice returns the slice of Time[T].
+func (p periodical[T]) Slice() (s []Time[T]) {
+	for current := range p {
+		s = append(s, current)
+	}
+	return s
+}
+
+// Periodic returns a channel that emits Time[T] values at regular intervals
+// between the start and end times of the Period[T]. The interval is specified
+// by the next function argument.
+//
+// If start < end, the process will increase from start to end. In other words,
+// when the current value exceeds end, the iteration is terminated.
+//
+// If start > end, the process will decrease from start to end. In other words,
+// when the current value falls below end, the iteration is terminated.
+func (p Period[T]) Periodic(next func(Time[T]) Time[T]) periodical[T] {
+	compare := isNotAfter[T]
+	// p.start > p.end
+	if p.start.After(p.end) {
+		compare = isNotBefore[T]
+	}
+	ch := make(chan Time[T], 1)
+	go func() {
+		defer close(ch)
+		for current := p.start; compare(current, p.end); current = next(current) {
+			ch <- current
+		}
+	}()
+	return ch
+}
+
+func isNotAfter[T TimeZone](t1, t2 Time[T]) bool {
+	// t1.Compare(t2) <= 0
+	return !t1.After(t2)
+}
+
+func isNotBefore[T TimeZone](t1, t2 Time[T]) bool {
+	// t1.Compare(t2) >= 0
+	return !t1.Before(t2)
+}
+
+// PeriodicDuration is a wrapper for the Periodic function.
+// The interval is specified by the time.Duration argument.
+func (p Period[T]) PeriodicDuration(d time.Duration) periodical[T] {
+	return p.Periodic(func(t Time[T]) Time[T] {
+		return t.Add(d)
+	})
+}
+
+// PeriodicDuration is a wrapper for the Periodic function.
+// The interval is specified by the given number of years, months, and days.
+func (p Period[T]) PeriodicDate(years int, months int, days int) periodical[T] {
+	return p.Periodic(func(t Time[T]) Time[T] {
+		return t.AddDate(years, months, days)
+	})
+}
+
+// PeriodicAdvance is a wrapper for the Periodic function.
+// The interval is specified by the provided date and time unit arguments.
+func (p Period[T]) PeriodicAdvance(u1 unit, u2 ...unit) periodical[T] {
+	return p.Periodic(func(t Time[T]) Time[T] {
+		return t.Advance(u1, u2...)
+	})
+}
+
+// PeriodicISODuration is a wrapper for the Periodic function. It accepts a duration
+// in ISO 8601 format as a parameter.
+//
+// Examples of valid durations include:
+//
+//	PnYnMnDTnHnMnS (e.g., P3Y6M4DT12H30M5S)
+//	PnW (e.g., P4W)
+func (p Period[T]) PeriodicISODuration(duration string) (periodical[T], error) {
+	d, err := iso8601.ParseDuration(duration)
+	if err != nil {
+		return nil, err
+	}
+	if d.IsZero() {
+		return nil, fmt.Errorf("empty duration is not accepted: %q", duration)
+	}
+	sign := 1
+	if d.Negative {
+		sign = -1
+	}
+	return p.Periodic(func(t Time[T]) Time[T] {
+		var (
+			years  int
+			months int
+			days   int
+		)
+
+		if d.Year > 0 {
+			years = sign * d.Year
+		}
+		if d.Month > 0 {
+			months = sign * int(d.Month)
+		}
+		if d.Week > 0 {
+			days += sign * 7 * d.Week
+		}
+		if d.Day > 0 {
+			days += sign * d.Day
+		}
+		if years != 0 || months != 0 || days != 0 {
+			t = t.AddDate(years, months, days)
+		}
+		return t.Add(d.StdClockDuration())
+	}), nil
+}
+
+func convertTime[T TimeZone](arg any) (Time[T], error) {
+	switch v := arg.(type) {
+	case Time[T]:
+		return v, nil
+	case time.Time:
+		return In[T](v), nil
+	case string:
+		return ParseISO[T](v)
+	case []byte:
+		return ParseISO[T](string(v))
+	default:
+		rv := reflect.ValueOf(v)
+		if rv.CanConvert(stringType) {
+			return ParseISO[T](rv.Convert(stringType).String())
+		}
+		panic("unreachable")
+	}
+}

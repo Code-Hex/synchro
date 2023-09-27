@@ -1480,6 +1480,109 @@ func TestDuration_StdDuration(t *testing.T) {
 	}
 }
 
+func TestDuration_StdClockDuration(t *testing.T) {
+	tests := []struct {
+		name string
+		d    Duration
+		want time.Duration
+	}{
+		{
+			name: "8765h49m12s", // 1 year
+			d: Duration{
+				Year: 1,
+			},
+			want: 0,
+		},
+		{
+			name: "730h33m36s", // 1 month
+			d: Duration{
+				Month: 1,
+			},
+			want: 0,
+		},
+		{
+			name: "168h0m0s", // 1 week
+			d: Duration{
+				Week: 1,
+			},
+			want: 0,
+		},
+		{
+			name: "24h0m0s", // 1 day
+			d: Duration{
+				Day: 1,
+			},
+			want: 0,
+		},
+		{
+			name: "1h0m0s",
+			d: Duration{
+				Hour: 1,
+			},
+			want: time.Hour,
+		},
+		{
+			name: "1m0s",
+			d: Duration{
+				Minute: 1,
+			},
+			want: time.Minute,
+		},
+		{
+			name: "1s",
+			d: Duration{
+				Second: 1,
+			},
+			want: time.Second,
+		},
+		{
+			name: "1ms",
+			d: Duration{
+				Millisecond: 1,
+			},
+			want: time.Millisecond,
+		},
+		{
+			name: "1µs",
+			d: Duration{
+				Microsecond: 1,
+			},
+			want: time.Microsecond,
+		},
+		{
+			name: "1ns",
+			d: Duration{
+				Nanosecond: 1,
+			},
+			want: time.Nanosecond,
+		},
+		{
+			name: "8765h49m13s", // 1 year + 1 sec
+			d: Duration{
+				Year:   1,
+				Second: 1,
+			},
+			want: time.Second,
+		},
+		{
+			name: "-730h34m36s", // 1 month + 1 minute
+			d: Duration{
+				Month:    1,
+				Minute:   1,
+				Negative: true,
+			},
+			want: -1 * (time.Minute),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.d.StdClockDuration(); got != tt.want {
+				t.Errorf("Duration.StdClockDuration() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestNewDuration(t *testing.T) {
 	tests := []struct {
 		d    time.Duration
