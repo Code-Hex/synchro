@@ -55,15 +55,36 @@ func (p periodical[T]) Slice() (s []Time[T]) {
 // Periodic returns a channel that emits Time[T] values at regular intervals
 // between the start and end times of the Period[T]. The interval is specified
 // by the next function argument.
+//
+// If start < end, the process will increase from start to end. In other words,
+// when the current value exceeds end, the iteration is terminated.
+//
+// If start > end, the process will decrease from start to end. In other words,
+// when the current value falls below end, the iteration is terminated.
 func (p Period[T]) Periodic(next func(Time[T]) Time[T]) periodical[T] {
+	compare := isNotAfter[T]
+	// p.start > p.end
+	if p.start.After(p.end) {
+		compare = isNotBefore[T]
+	}
 	ch := make(chan Time[T], 1)
 	go func() {
 		defer close(ch)
-		for current := p.start; current.Compare(p.end) <= 0; current = next(current) {
+		for current := p.start; compare(current, p.end); current = next(current) {
 			ch <- current
 		}
 	}()
 	return ch
+}
+
+func isNotAfter[T TimeZone](t1, t2 Time[T]) bool {
+	// t1.Compare(t2) <= 0
+	return !t1.After(t2)
+}
+
+func isNotBefore[T TimeZone](t1, t2 Time[T]) bool {
+	// t1.Compare(t2) >= 0
+	return !t1.Before(t2)
 }
 
 // PeriodicDuration is a wrapper for the Periodic function.
@@ -102,6 +123,9 @@ func (p Period[T]) PeriodicISODuration(duration string) (periodical[T], error) {
 	if err != nil {
 		return nil, err
 	}
+	if d.IsZero() {
+		return nil, fmt.Errorf("empty duration is not accepted: %q", duration)
+	}
 	sign := 1
 	if d.Negative {
 		sign = -1
@@ -125,7 +149,10 @@ func (p Period[T]) PeriodicISODuration(duration string) (periodical[T], error) {
 		if d.Day > 0 {
 			days += sign * d.Day
 		}
-		return t.AddDate(years, months, days).Add(d.StdClockDuration())
+		if years != 0 || months != 0 || days != 0 {
+			t = t.AddDate(years, months, days)
+		}
+		return t.Add(d.StdClockDuration())
 	}), nil
 }
 

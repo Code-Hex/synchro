@@ -1,9 +1,11 @@
 package synchro
 
 import (
+	"strings"
 	"testing"
 	"time"
 
+	"github.com/Code-Hex/synchro/iso8601"
 	"github.com/Code-Hex/synchro/tz"
 	"github.com/google/go-cmp/cmp"
 )
@@ -111,24 +113,178 @@ func TestPeriod_Slice(t *testing.T) {
 }
 
 func TestPeriod_PeriodicISO(t *testing.T) {
-	period, err := NewPeriod[tz.UTC]("2018-08-16", "2018-10-31")
-	if err != nil {
-		t.Fatal(err)
+	cases := []struct {
+		duration string
+		from     string
+		to       string
+		want     []Time[tz.UTC]
+	}{
+		{
+			duration: "P1Y",
+			from:     "2018-08-16",
+			to:       "2020-10-31",
+			want: []Time[tz.UTC]{
+				New[tz.UTC](2018, 8, 16, 0, 0, 0, 0),
+				New[tz.UTC](2019, 8, 16, 0, 0, 0, 0),
+				New[tz.UTC](2020, 8, 16, 0, 0, 0, 0),
+			},
+		},
+		{
+			duration: "P1M",
+			from:     "2018-08-16",
+			to:       "2018-10-31",
+			want: []Time[tz.UTC]{
+				New[tz.UTC](2018, 8, 16, 0, 0, 0, 0),
+				New[tz.UTC](2018, 9, 16, 0, 0, 0, 0),
+				New[tz.UTC](2018, 10, 16, 0, 0, 0, 0),
+			},
+		},
+		{
+			duration: "P3W",
+			from:     "2018-08-16",
+			to:       "2018-11-16",
+			want: []Time[tz.UTC]{
+				New[tz.UTC](2018, 8, 16, 0, 0, 0, 0),
+				New[tz.UTC](2018, 9, 6, 0, 0, 0, 0),
+				New[tz.UTC](2018, 9, 27, 0, 0, 0, 0),
+				New[tz.UTC](2018, 10, 18, 0, 0, 0, 0),
+				New[tz.UTC](2018, 11, 8, 0, 0, 0, 0),
+			},
+		},
+		{
+			duration: "P7D",
+			from:     "2018-08-01",
+			to:       "2018-08-31",
+			want: []Time[tz.UTC]{
+				New[tz.UTC](2018, 8, 1, 0, 0, 0, 0),
+				New[tz.UTC](2018, 8, 8, 0, 0, 0, 0),
+				New[tz.UTC](2018, 8, 15, 0, 0, 0, 0),
+				New[tz.UTC](2018, 8, 22, 0, 0, 0, 0),
+				New[tz.UTC](2018, 8, 29, 0, 0, 0, 0),
+			},
+		},
+		{
+			duration: "P1Y2M3W4D",
+			from:     "2018-08-01",
+			to:       "2020-08-31",
+			want: []Time[tz.UTC]{
+				New[tz.UTC](2018, 8, 1, 0, 0, 0, 0),
+				New[tz.UTC](2019, 10, 1+21+4, 0, 0, 0, 0),
+			},
+		},
+		{
+			duration: "PT24H",
+			from:     "2018-08-01",
+			to:       "2018-08-05",
+			want: []Time[tz.UTC]{
+				New[tz.UTC](2018, 8, 1, 0, 0, 0, 0),
+				New[tz.UTC](2018, 8, 2, 0, 0, 0, 0),
+				New[tz.UTC](2018, 8, 3, 0, 0, 0, 0),
+				New[tz.UTC](2018, 8, 4, 0, 0, 0, 0),
+				New[tz.UTC](2018, 8, 5, 0, 0, 0, 0),
+			},
+		},
+		{
+			duration: "-P1Y",
+			from:     "2020-10-31",
+			to:       "2018-08-16",
+			want: []Time[tz.UTC]{
+				New[tz.UTC](2020, 10, 31, 0, 0, 0, 0),
+				New[tz.UTC](2019, 10, 31, 0, 0, 0, 0),
+				New[tz.UTC](2018, 10, 31, 0, 0, 0, 0),
+			},
+		},
+		{
+			duration: "-PT24H",
+			from:     "2018-08-05",
+			to:       "2018-08-01",
+			want: []Time[tz.UTC]{
+				New[tz.UTC](2018, 8, 5, 0, 0, 0, 0),
+				New[tz.UTC](2018, 8, 4, 0, 0, 0, 0),
+				New[tz.UTC](2018, 8, 3, 0, 0, 0, 0),
+				New[tz.UTC](2018, 8, 2, 0, 0, 0, 0),
+				New[tz.UTC](2018, 8, 1, 0, 0, 0, 0),
+			},
+		},
+		{
+			duration: "-P1DT1S",
+			from:     "2018-08-05T00:00:00",
+			to:       "2018-08-01T00:00:00",
+			want: []Time[tz.UTC]{
+				New[tz.UTC](2018, 8, 5, 0, 0, 0, 0),
+				New[tz.UTC](2018, 8, 3, 23, 59, 59, 0),
+				New[tz.UTC](2018, 8, 2, 23, 59, 58, 0),
+				New[tz.UTC](2018, 8, 1, 23, 59, 57, 0),
+			},
+		},
+	}
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.duration, func(t *testing.T) {
+			period, err := NewPeriod[tz.UTC](tc.from, tc.to)
+			if err != nil {
+				t.Fatal(err)
+			}
+			iter, err := period.PeriodicISODuration(tc.duration)
+			if err != nil {
+				t.Fatal(err)
+			}
+			got := iter.Slice()
+			if diff := cmp.Diff(tc.want, got); diff != "" {
+				t.Fatalf("(-want, +got)\n%s", diff)
+			}
+		})
 	}
 
-	t.Run("valid", func(t *testing.T) {
-		iter, err := period.PeriodicISODuration("P1M")
+	t.Run("invalid parse duration", func(t *testing.T) {
+		period, err := NewPeriod[tz.UTC]("2023-08-16", "2023-08-17")
 		if err != nil {
 			t.Fatal(err)
 		}
-		got := iter.Slice()
-		want := []Time[tz.UTC]{
-			New[tz.UTC](2018, 8, 16, 0, 0, 0, 0),
-			New[tz.UTC](2018, 9, 16, 0, 0, 0, 0),
-			New[tz.UTC](2018, 10, 16, 0, 0, 0, 0),
+		_, err = period.PeriodicISODuration("unknown")
+		if err == nil {
+			t.Fatal("want error")
 		}
-		if diff := cmp.Diff(want, got); diff != "" {
-			t.Fatalf("(-want, +got)\n%s", diff)
+		if _, ok := err.(*iso8601.UnexpectedTokenError); !ok {
+			t.Fatalf("unexpected error: %v", err)
 		}
 	})
+
+	t.Run("invalid zero duration", func(t *testing.T) {
+		period, err := NewPeriod[tz.UTC]("2023-08-16", "2023-08-17")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		t.Run("positive", func(t *testing.T) {
+			duration := "P0D"
+			_, err = period.PeriodicISODuration(duration)
+			if err == nil {
+				t.Fatal("want error")
+			}
+			if !strings.Contains(err.Error(), duration) {
+				t.Fatalf("want contains %q in %q", duration, err)
+			}
+		})
+		t.Run("negative", func(t *testing.T) {
+			duration := "-PT0S"
+			_, err = period.PeriodicISODuration(duration)
+			if err == nil {
+				t.Fatal("want error")
+			}
+			if !strings.Contains(err.Error(), duration) {
+				t.Fatalf("want contains %q in %q", duration, err)
+			}
+		})
+	})
+}
+
+// Unfortunate test to cover 100%
+func TestConvertTime_Panic(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("The code did not panic")
+		}
+	}()
+	convertTime[tz.UTC](true)
 }
