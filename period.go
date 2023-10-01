@@ -52,6 +52,22 @@ func NewPeriod[T TimeZone, T1 timeish[T], T2 timeish[T]](from T1, to T2) (Period
 	}, nil
 }
 
+// Contains checks whether the specified t is included within from and to.
+//
+// if p.from < t && t < p.to, it returns +1; if p.from == t || t == p.to, it returns 0.
+// Otherwise returns -1;
+func (p Period[T]) Contains(t Time[T]) int {
+	cmpFrom := p.start.Compare(t)
+	cmpTo := p.end.Compare(t)
+	if cmpFrom == -1 && cmpTo == 1 {
+		return 1
+	}
+	if cmpFrom == 0 || cmpTo == 0 {
+		return 0
+	}
+	return -1
+}
+
 type periodical[T TimeZone] <-chan Time[T]
 
 // Slice returns the slice of Time[T].
