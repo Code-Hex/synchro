@@ -19,8 +19,8 @@ var stringType = reflect.TypeOf("")
 // Period allows iteration over a set of dates and times,
 // recurring at regular intervals, over a given period.
 type Period[T TimeZone] struct {
-	start Time[T]
-	end   Time[T]
+	from Time[T]
+	to   Time[T]
 }
 
 var _ interface {
@@ -29,8 +29,14 @@ var _ interface {
 
 // String implements the fmt.Stringer interface.
 func (p Period[T]) String() string {
-	return fmt.Sprintf("from %s to %s", p.start, p.end)
+	return fmt.Sprintf("from %s to %s", p.from, p.to)
 }
+
+// From returns end of period.
+func (p Period[T]) From() Time[T] { return p.from }
+
+// To returns start of period.
+func (p Period[T]) To() Time[T] { return p.to }
 
 // NewPeriod creates a new Period struct between the 'from' and 'to' values you specified.
 //
@@ -47,9 +53,25 @@ func NewPeriod[T TimeZone, T1 timeish[T], T2 timeish[T]](from T1, to T2) (Period
 		return Period[T]{}, fmt.Errorf("failed to parse to: %w", err)
 	}
 	return Period[T]{
-		start: start,
-		end:   end,
+		from: start,
+		to:   end,
 	}, nil
+}
+
+// Contains checks whether the specified t is included within from and to.
+//
+// if p.from < t && t < p.to, it returns +1; if p.from == t || t == p.to, it returns 0.
+// Otherwise returns -1;
+func (p Period[T]) Contains(t Time[T]) int {
+	cmpFrom := p.from.Compare(t)
+	cmpTo := p.to.Compare(t)
+	if cmpFrom == -1 && cmpTo == 1 {
+		return 1
+	}
+	if cmpFrom == 0 || cmpTo == 0 {
+		return 0
+	}
+	return -1
 }
 
 type periodical[T TimeZone] <-chan Time[T]
@@ -74,13 +96,13 @@ func (p periodical[T]) Slice() (s []Time[T]) {
 func (p Period[T]) Periodic(next func(Time[T]) Time[T]) periodical[T] {
 	compare := isNotAfter[T]
 	// p.start > p.end
-	if p.start.After(p.end) {
+	if p.from.After(p.to) {
 		compare = isNotBefore[T]
 	}
 	ch := make(chan Time[T], 1)
 	go func() {
 		defer close(ch)
-		for current := p.start; compare(current, p.end); current = next(current) {
+		for current := p.from; compare(current, p.to); current = next(current) {
 			ch <- current
 		}
 	}()

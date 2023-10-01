@@ -95,7 +95,8 @@ func (t Time[T]) IsLeapYear() bool {
 
 // IsBetween returns true if from < t && t < to.
 func (t Time[T]) IsBetween(from Time[T], to Time[T]) bool {
-	return from.Before(t) && to.After(t)
+	p, _ := NewPeriod[T](from, to)
+	return p.Contains(t) == 1
 }
 
 // DiffInCalendarDays calculates the difference in calendar days between t and u. (t-u)

@@ -288,3 +288,93 @@ func TestConvertTime_Panic(t *testing.T) {
 	}()
 	convertTime[tz.UTC](true)
 }
+
+func TestPeriod_Contains(t *testing.T) {
+	cases := []struct {
+		name string
+		t    Time[tz.UTC]
+		from string
+		to   string
+		want int
+	}{
+		{
+			name: "2018-08-16 is included between 2018-08-15 and 2018-08-17",
+			t:    New[tz.UTC](2018, 8, 16, 0, 0, 0, 0),
+			from: "2018-08-15",
+			to:   "2018-08-17",
+			want: 1,
+		},
+		{
+			name: "2018-12-30 is included between 2018-12-28 and 2019-01-01",
+			t:    New[tz.UTC](2018, 12, 30, 0, 0, 0, 0),
+			from: "2018-12-28",
+			to:   "2019-01-01",
+			want: 1,
+		},
+		{
+			name: "2018-08-15 is the same as from",
+			t:    New[tz.UTC](2018, 8, 15, 0, 0, 0, 0),
+			from: "2018-08-15",
+			to:   "2018-08-17",
+			want: 0,
+		},
+		{
+			name: "2018-08-17 is the same as from",
+			t:    New[tz.UTC](2018, 8, 17, 0, 0, 0, 0),
+			from: "2018-08-15",
+			to:   "2018-08-17",
+			want: 0,
+		},
+		{
+			name: "2018-08-18 is not included between 2018-08-15 and 2018-08-17",
+			t:    New[tz.UTC](2018, 8, 18, 0, 0, 0, 0),
+			from: "2018-08-15",
+			to:   "2018-08-17",
+			want: -1,
+		},
+		{
+			name: "2018-08-14 is not included between 2018-08-15 and 2018-08-17",
+			t:    New[tz.UTC](2018, 8, 14, 0, 0, 0, 0),
+			from: "2018-08-15",
+			to:   "2018-08-17",
+			want: -1,
+		},
+	}
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			period, err := NewPeriod[tz.UTC](tc.from, tc.to)
+			if err != nil {
+				t.Fatal(err)
+			}
+			got := period.Contains(tc.t)
+			if diff := cmp.Diff(tc.want, got); diff != "" {
+				t.Fatalf("(-want, +got)\n%s", diff)
+			}
+		})
+	}
+}
+
+func TestPeriod_From(t *testing.T) {
+	want := New[tz.UTC](2018, 8, 14, 0, 0, 0, 0)
+	period, err := NewPeriod[tz.UTC]("2018-08-14", "2018-08-16")
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := period.From()
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Fatalf("(-want, +got)\n%s", diff)
+	}
+}
+
+func TestPeriod_To(t *testing.T) {
+	want := New[tz.UTC](2018, 8, 16, 0, 0, 0, 0)
+	period, err := NewPeriod[tz.UTC]("2018-08-14", "2018-08-16")
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := period.To()
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Fatalf("(-want, +got)\n%s", diff)
+	}
+}

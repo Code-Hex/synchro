@@ -500,3 +500,16 @@ func ExamplePeriod_periodicalSlice() {
 	// 2009-01-01 02:00:00 +0000 UTC
 	// 2009-01-01 03:00:00 +0000 UTC
 }
+
+func ExamplePeriod_Contains() {
+	p, _ := synchro.NewPeriod[tz.UTC](
+		"2008-12-28",
+		"2009-01-03",
+	)
+	t := synchro.New[tz.UTC](2009, 1, 3, 0, 0, 0, 0)
+
+	// p.Contains(t) >= 0 is the same as 2008-12-28 <= t && t <= 2009-01-03
+	fmt.Println("p.Contains(t) >= 0:", p.Contains(t) >= 0)
+	// Output:
+	// p.Contains(t) >= 0: true
+}
