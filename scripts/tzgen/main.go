@@ -1,16 +1,22 @@
 package main
 
 import (
+	"archive/tar"
 	"bufio"
 	"bytes"
+	"compress/gzip"
 	"context"
 	"fmt"
 	"go/format"
+	"io"
 	"log"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
 )
+
+const tzdataURL = "https://data.iana.org/time-zones/releases/tzdata2023c.tar.gz"
 
 func main() {
 	if err := run(context.Background()); err != nil {
@@ -19,7 +25,39 @@ func main() {
 }
 
 func run(ctx context.Context) error {
-	tzs, err := listTimeZone()
+	// download tzdata
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, tzdataURL, nil)
+	if err != nil {
+		return err
+	}
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("failed to download tzdata: %w", err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("failed to download tzdata: %s", resp.Status)
+	}
+
+	// extract zone.tab
+	gr, err := gzip.NewReader(resp.Body)
+	if err != nil {
+		return err
+	}
+	defer gr.Close()
+	tr := tar.NewReader(gr)
+	for {
+		h, err := tr.Next()
+		if err != nil {
+			return err
+		}
+		if h.Name == "zone.tab" {
+			break
+		}
+	}
+
+	// read zone.tab
+	tzs, err := listTimeZone(tr)
 	if err != nil {
 		return err
 	}
@@ -28,17 +66,22 @@ func run(ctx context.Context) error {
 			return fmt.Errorf("%q: %w", tz, err)
 		}
 	}
+
+	// skip other files
+	for {
+		_, err := tr.Next()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
-func listTimeZone() (tz []string, _ error) {
-	file, err := os.Open("/usr/share/zoneinfo/zone.tab")
-	if err != nil {
-		return nil, fmt.Errorf("failed to open file: %w", err)
-	}
-	defer file.Close()
-
-	scanner := bufio.NewScanner(file)
+func listTimeZone(r io.Reader) (tz []string, err error) {
+	scanner := bufio.NewScanner(r)
 	for scanner.Scan() {
 		line := scanner.Text()
 		if strings.HasPrefix(line, "#") {
