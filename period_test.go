@@ -354,3 +354,27 @@ func TestPeriod_Contains(t *testing.T) {
 		})
 	}
 }
+
+func TestPeriod_From(t *testing.T) {
+	want := New[tz.UTC](2018, 8, 14, 0, 0, 0, 0)
+	period, err := NewPeriod[tz.UTC]("2018-08-14", "2018-08-16")
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := period.From()
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Fatalf("(-want, +got)\n%s", diff)
+	}
+}
+
+func TestPeriod_To(t *testing.T) {
+	want := New[tz.UTC](2018, 8, 16, 0, 0, 0, 0)
+	period, err := NewPeriod[tz.UTC]("2018-08-14", "2018-08-16")
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := period.To()
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Fatalf("(-want, +got)\n%s", diff)
+	}
+}

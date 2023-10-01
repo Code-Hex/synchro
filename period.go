@@ -32,6 +32,12 @@ func (p Period[T]) String() string {
 	return fmt.Sprintf("from %s to %s", p.from, p.to)
 }
 
+// From returns end of period.
+func (p Period[T]) From() Time[T] { return p.from }
+
+// To returns start of period.
+func (p Period[T]) To() Time[T] { return p.to }
+
 // NewPeriod creates a new Period struct between the 'from' and 'to' values you specified.
 //
 // If Time[T] or time.Time is specified, it guarantees no error returns.
