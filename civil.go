@@ -120,13 +120,13 @@ func (d *Date[T]) UnmarshalText(data []byte) error {
 // Change modifies the date based on the provided unit values.
 //
 // Note: Units related to time are ignored.
-func (t Date[T]) Change(u1 unit, u2 ...unit) Date[T] {
+func (t Date[T]) Change(u1 Unit, u2 ...Unit) Date[T] {
 	return DateOf[T](t.Time().Change(u1, u2...))
 }
 
 // Advance adjusts the date based on the provided unit values, moving it forward in date.
 //
 // Note: Units related to time are ignored.
-func (t Date[T]) Advance(u1 unit, u2 ...unit) Date[T] {
+func (t Date[T]) Advance(u1 Unit, u2 ...Unit) Date[T] {
 	return DateOf[T](t.Time().Advance(u1, u2...))
 }

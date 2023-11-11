@@ -4,7 +4,8 @@ import (
 	"time"
 )
 
-type unit interface {
+// Unit is a component of the time being built.
+type Unit interface {
 	cast() int
 }
 
@@ -42,11 +43,11 @@ func (ns Nanosecond) cast() int { return int(ns) }
 // Change modifies the time based on the provided unit values.
 // u1 is a required unit, while u2... can be provided as additional optional units.
 // This method returns a new Time[T] and does not modify the original.
-func (t Time[T]) Change(u1 unit, u2 ...unit) Time[T] {
+func (t Time[T]) Change(u1 Unit, u2 ...Unit) Time[T] {
 	year, month, day := t.Date()
 	hour, min, sec := t.Clock()
 	nsec := t.Nanosecond()
-	for _, u := range append([]unit{u1}, u2...) {
+	for _, u := range append([]Unit{u1}, u2...) {
 		switch v := u.(type) {
 		case Year:
 			year = v.cast()
@@ -71,10 +72,10 @@ func (t Time[T]) Change(u1 unit, u2 ...unit) Time[T] {
 // u1 is a required unit, while u2... can be provided as additional optional units.
 // This method returns a new Time[T] and does not modify the original.
 // The time is adjusted in the order the units are provided.
-func (t Time[T]) Advance(u1 unit, u2 ...unit) Time[T] {
+func (t Time[T]) Advance(u1 Unit, u2 ...Unit) Time[T] {
 	ret := t
 	years, months, days := 0, time.Month(0), 0
-	for _, u := range append([]unit{u1}, u2...) {
+	for _, u := range append([]Unit{u1}, u2...) {
 		switch v := u.(type) {
 		case Year:
 			years += v.cast()
