@@ -255,8 +255,8 @@ func TestUnmarshalJSON(t *testing.T) {
 func TestDateChange(t *testing.T) {
 	for _, test := range []struct {
 		date Date[tz.UTC]
-		u1   unit
-		u2   []unit
+		u1   Unit
+		u2   []Unit
 		want Date[tz.UTC]
 	}{
 		{
@@ -277,7 +277,7 @@ func TestDateChange(t *testing.T) {
 		{
 			date: Date[tz.UTC]{Year: 1987, Month: 4, Day: 15},
 			u1:   Year(1988),
-			u2:   []unit{Month(5), Day(10), Second(10)}, // ignore second
+			u2:   []Unit{Month(5), Day(10), Second(10)}, // ignore second
 			want: Date[tz.UTC]{Year: 1988, Month: 5, Day: 10},
 		},
 	} {
@@ -291,8 +291,8 @@ func TestDateChange(t *testing.T) {
 func TestDateAdvance(t *testing.T) {
 	for _, test := range []struct {
 		date Date[tz.UTC]
-		u1   unit
-		u2   []unit
+		u1   Unit
+		u2   []Unit
 		want Date[tz.UTC]
 	}{
 		{
@@ -313,7 +313,7 @@ func TestDateAdvance(t *testing.T) {
 		{
 			date: Date[tz.UTC]{Year: 1987, Month: 4, Day: 15},
 			u1:   Year(1),
-			u2:   []unit{Month(1), Day(-5), Second(10)}, // ignore second
+			u2:   []Unit{Month(1), Day(-5), Second(10)}, // ignore second
 			want: Date[tz.UTC]{Year: 1988, Month: 5, Day: 10},
 		},
 	} {

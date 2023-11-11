@@ -137,7 +137,7 @@ func (p Period[T]) PeriodicDate(years int, months int, days int) periodical[T] {
 
 // PeriodicAdvance is a wrapper for the Periodic function.
 // The interval is specified by the provided date and time unit arguments.
-func (p Period[T]) PeriodicAdvance(u1 unit, u2 ...unit) periodical[T] {
+func (p Period[T]) PeriodicAdvance(u1 Unit, u2 ...Unit) periodical[T] {
 	return p.Periodic(func(t Time[T]) Time[T] {
 		return t.Advance(u1, u2...)
 	})
