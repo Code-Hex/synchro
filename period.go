@@ -11,7 +11,7 @@ import (
 )
 
 type timeish[T TimeZone] interface {
-	Time[T] | time.Time | Date[T] | constraints.Bytes
+	Time[T] | time.Time | CivilDate[T] | constraints.Bytes
 }
 
 var stringType = reflect.TypeOf("")
@@ -194,7 +194,7 @@ func convertTime[T TimeZone](arg any) (Time[T], error) {
 		return v, nil
 	case time.Time:
 		return In[T](v), nil
-	case Date[T]:
+	case CivilDate[T]:
 		return v.Time(), nil
 	case string:
 		return ParseISO[T](v)

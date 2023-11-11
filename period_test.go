@@ -46,14 +46,14 @@ func TestPeriod_Slice(t *testing.T) {
 			t.Fatalf("(-want, +got)\n%s", diff)
 		}
 	})
-	t.Run("Date[UTC] params", func(t *testing.T) {
+	t.Run("CivilDate[UTC] params", func(t *testing.T) {
 		period, err := NewPeriod[tz.UTC](
-			Date[tz.UTC]{
+			CivilDate[tz.UTC]{
 				Year:  2014,
 				Month: 2,
 				Day:   5,
 			},
-			Date[tz.UTC]{
+			CivilDate[tz.UTC]{
 				Year:  2014,
 				Month: 2,
 				Day:   8,
