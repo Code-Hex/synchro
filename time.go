@@ -3,6 +3,8 @@ package synchro
 import (
 	"math"
 	"time"
+
+	"github.com/itchyny/timefmt-go"
 )
 
 type empty[T TimeZone] struct{}
@@ -107,4 +109,102 @@ func (t Time[T]) DiffInCalendarDays(u Time[T]) int {
 	t1 := t.Truncate(day)
 	u1 := u.Truncate(day)
 	return int(math.Ceil(float64(t1.Sub(u1)) / float64(day)))
+}
+
+// Strftime formats the time according to the given format string.
+//
+// This method is a wrapper for the [github.com/itchyny/timefmt-go] library.
+//
+// Example:
+//   - %Y-%m-%d %H:%M:%S => 2023-09-02 14:09:56
+//   - %a, %d %b %Y %T %z => Sat, 02 Sep 2023 14:09:56 +0900
+//
+// The format string should follow the format of [strftime(3)] in man pages.
+// The following table shows the supported format specifiers:
+//
+//	%a:
+//	    Abbreviated weekday name (Sun)
+//	%A:
+//	    Full weekday name (Sunday)
+//	%b:
+//	    Abbreviated month name (Jan)
+//	%B:
+//	    Full month name (January)
+//	%c:
+//	    Date and time representation
+//	%C:
+//	    Year divided by 100 (00-99)
+//	%d:
+//	    Day of the month (01-31)
+//	%D:
+//	    Short MM/DD/YY date, equivalent to %m/%d/%y
+//	%e:
+//	    Day of the month, with a space preceding single digits ( 1-31)
+//	%F:
+//	    Equivalent to %Y-%m-%d (the ISO 8601 date format)
+//	%g:
+//	    Week-based year, last two digits (00-99)
+//	%G:
+//	    Week-based year
+//	%h:
+//	    Abbreviated month name (Jan)
+//	%H:
+//	    Hour in 24h format (00-23)
+//	%I:
+//	    Hour in 12h format (01-12)
+//	%j:
+//	    Day of the year (001-366)
+//	%m:
+//	    Month as a decimal number (01-12)
+//	%M:
+//	    Minute (00-59)
+//	%n:
+//	    New-line character
+//	%p:
+//	    AM or PM designation
+//	%P:
+//	    am or pm designation
+//	%r:
+//	    12-hour clock time
+//	%R:
+//	    24-hour HH:MM time, equivalent to %H:%M
+//	%S:
+//	    Second (00-59)
+//	%t:
+//	    Horizontal-tab character
+//	%T:
+//	    24-hour clock time, equivalent to %H:%M:%S
+//	%u:
+//	    ISO 8601 weekday as number with Monday as 1 (1-7)
+//	%U:
+//	    Week number with the first Sunday as the first day of week (00-53)
+//	%V:
+//	    ISO 8601 week number (01-53)
+//	%w:
+//	    Weekday as a decimal number with Sunday as 0 (0-6)
+//	%W:
+//	    Week number with the first Monday as the first day of week (00-53)
+//	%x:
+//	    Date representation
+//	%X:
+//	    Time representation
+//	%y:
+//	    Year, last two digits (00-99)
+//	%Y:
+//	    Year
+//	%z:
+//	    ISO 8601 offset from UTC in timezone (+HHMM)
+//	%Z:
+//	    Timezone name or abbreviation
+//	%+:
+//	    Extended date and time representation
+//	%::z:
+//	    Colon-separated offset from UTC in timezone (e.g. +05:00)
+//	%:::z:
+//	    Like %::z, but with optional seconds
+//
+// [strftime(3)]: https://linux.die.net/man/3/strftime
+// [github.com/itchyny/timefmt-go]: https://github.com/itchyny/timefmt-go
+func (t Time[T]) Strftime(format string) string {
+	return timefmt.Format(t.StdTime(), format)
 }

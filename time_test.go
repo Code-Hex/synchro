@@ -614,3 +614,12 @@ func TestDiffInCalendarDays(t *testing.T) {
 		})
 	}
 }
+
+func ExampleTime_Strftime() {
+	t := synchro.New[tz.AsiaTokyo](2023, 9, 2, 14, 9, 56, 0)
+	fmt.Println(t.Strftime("%Y-%m-%d %H:%M:%S"))
+	fmt.Println(t.Strftime("%a, %d %b %Y %T %z"))
+	// Output:
+	// 2023-09-02 14:09:56
+	// Sat, 02 Sep 2023 14:09:56 +0900
+}
