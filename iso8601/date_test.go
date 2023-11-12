@@ -1373,6 +1373,12 @@ func TestOrdinalDate_Date(t *testing.T) {
 			if diff := cmp.Diff(tt.want, got); diff != "" {
 				t.Errorf("(-want, +got)\n%s", diff)
 			}
+
+			want := tt.o
+			got2 := got.OrdinalDate()
+			if diff := cmp.Diff(want, got2); diff != "" {
+				t.Errorf("(-want, +got)\n%s", diff)
+			}
 		})
 	}
 }
@@ -2194,6 +2200,12 @@ func TestQuarterDate_Date(t *testing.T) {
 			if diff := cmp.Diff(tt.want, got); diff != "" {
 				t.Errorf("(-want, +got)\n%s", diff)
 			}
+
+			want := tt.q
+			got2 := got.QuarterDate()
+			if diff := cmp.Diff(want, got2); diff != "" {
+				t.Errorf("(-want, +got)\n%s", diff)
+			}
 		})
 	}
 }
@@ -2825,6 +2837,12 @@ func TestWeekDate_Date(t *testing.T) {
 				g := time.Date(got.Year, got.Month, got.Day, 0, 0, 0, 0, time.UTC)
 				t.Errorf("(-want, +got)\n%s- %q (%s)\n+ %q (%s)", diff, w, w.Weekday(), g, g.Weekday())
 			}
+
+			want := tt.w
+			got2 := got.WeekDate()
+			if diff := cmp.Diff(want, got2); diff != "" {
+				t.Errorf("(-want, +got)\n%s", diff)
+			}
 		})
 	}
 }
@@ -3095,6 +3113,15 @@ func TestDate_String(t *testing.T) {
 			if got := tt.d.String(); got != tt.want {
 				t.Errorf("Date.String() = %v, want %v", got, tt.want)
 			}
+
+			tmp, err := tt.d.MarshalText()
+			if err != nil {
+				t.Fatal(err)
+			}
+			got2 := string(tmp)
+			if got2 != tt.want {
+				t.Errorf("Date.MarshalText() = %v, want %v", got2, tt.want)
+			}
 		})
 	}
 }
@@ -3126,6 +3153,15 @@ func TestQuarterDate_String(t *testing.T) {
 			if got := tt.q.String(); got != tt.want {
 				t.Errorf("QuarterDate.String() = %v, want %v", got, tt.want)
 			}
+
+			tmp, err := tt.q.MarshalText()
+			if err != nil {
+				t.Fatal(err)
+			}
+			got2 := string(tmp)
+			if got2 != tt.want {
+				t.Errorf("QuarterDate.MarshalText() = %v, want %v", got2, tt.want)
+			}
 		})
 	}
 }
@@ -3156,6 +3192,15 @@ func TestWeekDate_String(t *testing.T) {
 		t.Run(tt.want, func(t *testing.T) {
 			if got := tt.w.String(); got != tt.want {
 				t.Errorf("WeekDate.String() = %v, want %v", got, tt.want)
+			}
+
+			tmp, err := tt.w.MarshalText()
+			if err != nil {
+				t.Fatal(err)
+			}
+			got2 := string(tmp)
+			if got2 != tt.want {
+				t.Errorf("WeekDate.MarshalText() = %v, want %v", got2, tt.want)
 			}
 		})
 	}
@@ -3192,6 +3237,195 @@ func TestOrdinalDate_String(t *testing.T) {
 		t.Run(tt.want, func(t *testing.T) {
 			if got := tt.o.String(); got != tt.want {
 				t.Errorf("OrdinalDate.String() = %v, want %v", got, tt.want)
+			}
+
+			tmp, err := tt.o.MarshalText()
+			if err != nil {
+				t.Fatal(err)
+			}
+			got2 := string(tmp)
+			if got2 != tt.want {
+				t.Errorf("OrdinalDate.MarshalText() = %v, want %v", got2, tt.want)
+			}
+		})
+	}
+}
+
+func TestDate_UnmarshalText(t *testing.T) {
+	tests := []struct {
+		name    string
+		data    string
+		want    Date
+		wantErr bool
+	}{
+		{
+			name: "valid unmarshal",
+			data: "2023-11-12",
+			want: Date{
+				Year:  2023,
+				Month: 11,
+				Day:   12,
+			},
+			wantErr: false,
+		},
+		{
+			name:    "invalid unmarshal",
+			data:    "invalid",
+			want:    Date{},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var got Date
+			err := got.UnmarshalText([]byte(tt.data))
+			if (err != nil) != tt.wantErr {
+				t.Fatalf("Date.UnmarshalText() error = %v, wantErr %v", err, tt.wantErr)
+			}
+			if diff := cmp.Diff(got, tt.want); diff != "" {
+				t.Fatalf("(-want, +got)\n%s", diff)
+			}
+		})
+	}
+}
+
+func TestQuarterDate_UnmarshalText(t *testing.T) {
+	tests := []struct {
+		name    string
+		data    string
+		want    QuarterDate
+		wantErr bool
+	}{
+		{
+			name: "valid unmarshal",
+			data: "2012-Q4-85",
+			want: QuarterDate{
+				Year:    2012,
+				Quarter: 4,
+				Day:     85,
+			},
+			wantErr: false,
+		},
+		{
+			name:    "invalid unmarshal",
+			data:    "invalid",
+			want:    QuarterDate{},
+			wantErr: true,
+		},
+		{
+			name: "valid non quarter date format but convertable",
+			data: "2023-11-12",
+			want: QuarterDate{
+				Year:    2023,
+				Quarter: 4,
+				Day:     43,
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var got QuarterDate
+			err := got.UnmarshalText([]byte(tt.data))
+			if (err != nil) != tt.wantErr {
+				t.Fatalf("QuarterDate.UnmarshalText() error = %v, wantErr %v", err, tt.wantErr)
+			}
+			if diff := cmp.Diff(tt.want, got); diff != "" {
+				t.Fatalf("(-want, +got)\n%s", diff)
+			}
+		})
+	}
+}
+
+func TestWeekDate_UnmarshalText(t *testing.T) {
+	tests := []struct {
+		name    string
+		data    string
+		want    WeekDate
+		wantErr bool
+	}{
+		{
+			name: "valid unmarshal",
+			data: "2012-W52-1",
+			want: WeekDate{
+				Year: 2012,
+				Week: 52,
+				Day:  1,
+			},
+			wantErr: false,
+		},
+		{
+			name:    "invalid unmarshal",
+			data:    "invalid",
+			want:    WeekDate{},
+			wantErr: true,
+		},
+		{
+			name: "valid non week date format but convertable",
+			data: "2023-11-12",
+			want: WeekDate{
+				Year: 2023,
+				Week: 45,
+				Day:  7,
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var got WeekDate
+			err := got.UnmarshalText([]byte(tt.data))
+			if (err != nil) != tt.wantErr {
+				t.Fatalf("WeekDate.UnmarshalText() error = %v, wantErr %v", err, tt.wantErr)
+			}
+			if diff := cmp.Diff(tt.want, got); diff != "" {
+				t.Fatalf("(-want, +got)\n%s", diff)
+			}
+		})
+	}
+}
+
+func TestOrdinalDate_UnmarshalText(t *testing.T) {
+	tests := []struct {
+		name    string
+		data    string
+		want    OrdinalDate
+		wantErr bool
+	}{
+		{
+			name: "valid unmarshal",
+			data: "2012-123",
+			want: OrdinalDate{
+				Year: 2012,
+				Day:  123,
+			},
+			wantErr: false,
+		},
+		{
+			name:    "invalid unmarshal",
+			data:    "invalid",
+			want:    OrdinalDate{},
+			wantErr: true,
+		},
+		{
+			name: "valid non ordinal date format but convertable",
+			data: "2023-11-12",
+			want: OrdinalDate{
+				Year: 2023,
+				Day:  316,
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var got OrdinalDate
+			err := got.UnmarshalText([]byte(tt.data))
+			if (err != nil) != tt.wantErr {
+				t.Fatalf("OrdinalDate.UnmarshalText() error = %v, wantErr %v", err, tt.wantErr)
+			}
+			if diff := cmp.Diff(tt.want, got); diff != "" {
+				t.Fatalf("(-want, +got)\n%s", diff)
 			}
 		})
 	}

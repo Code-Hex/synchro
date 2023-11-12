@@ -1,6 +1,7 @@
 package iso8601
 
 import (
+	"encoding"
 	"fmt"
 	"math"
 	"strconv"
@@ -365,7 +366,9 @@ type Date struct {
 var _ interface {
 	DateLike
 	fmt.Stringer
-} = Date{}
+	encoding.TextMarshaler
+	encoding.TextUnmarshaler
+} = (*Date)(nil)
 
 // String returns the ISO8601 string representation of the format "YYYY-MM-DD".
 // For example: "2012-12-01".
@@ -422,6 +425,70 @@ func (d Date) StdTime() time.Time {
 	return time.Date(d.Year, d.Month, d.Day, 0, 0, 0, 0, time.UTC)
 }
 
+// QuarterDate converts a Date to a QuarterDate.
+// It calculates the quarter of the year and the day within that quarter for the given date.
+func (d Date) QuarterDate() QuarterDate {
+	t := time.Date(d.Year, d.Month, d.Day, 0, 0, 0, 0, time.UTC)
+	yday := t.YearDay() // 1 ~ 366
+
+	quarter := 1
+	for yday > daysInQuarter(d.Year, quarter) {
+		yday -= daysInQuarter(d.Year, quarter)
+		quarter++
+	}
+
+	return QuarterDate{
+		Year:    d.Year,
+		Quarter: quarter,
+		Day:     yday,
+	}
+}
+
+// WeekDate converts a Date to a WeekDate.
+// It calculates the week of the year and the day within that week for the given date.
+func (d Date) WeekDate() WeekDate {
+	t := time.Date(d.Year, d.Month, d.Day, 0, 0, 0, 0, time.UTC)
+	year, week := t.ISOWeek()
+	day := int(t.Weekday())
+	if day == 0 {
+		day = 7
+	}
+	return WeekDate{
+		Year: year,
+		Week: week,
+		Day:  day,
+	}
+}
+
+// OrdinalDate converts a Date to an OrdinalDate.
+// It calculates the day of the year for the given date.
+func (d Date) OrdinalDate() OrdinalDate {
+	t := time.Date(d.Year, d.Month, d.Day, 0, 0, 0, 0, time.UTC)
+	yday := t.YearDay() // 1 ~ 366
+	return OrdinalDate{
+		Year: d.Year,
+		Day:  yday,
+	}
+}
+
+// MarshalText implements the encoding.TextMarshaler interface.
+// The output is the result of t.String().
+func (d Date) MarshalText() ([]byte, error) {
+	return []byte(d.String()), nil
+}
+
+// UnmarshalText implements the encoding.TextUnmarshaler interface.
+// The date is expected to be a string in a format accepted by ParseDate.
+func (d *Date) UnmarshalText(data []byte) error {
+	var err error
+	dt, err := ParseDate(data)
+	if err != nil {
+		return err
+	}
+	*d = dt.Date()
+	return nil
+}
+
 // QuarterDate represents a date within a specific quarter of a year.
 // It includes the year, quarter (from 1 to 4), and day within that quarter.
 type QuarterDate struct {
@@ -433,7 +500,9 @@ type QuarterDate struct {
 var _ interface {
 	DateLike
 	fmt.Stringer
-} = QuarterDate{}
+	encoding.TextMarshaler
+	encoding.TextUnmarshaler
+} = (*QuarterDate)(nil)
 
 // String returns the ISO8601 string representation of the format "YYYY-QX-DD".
 // For example: "2012-Q4-85".
@@ -496,6 +565,29 @@ func (q QuarterDate) Validate() error {
 	return nil
 }
 
+// MarshalText implements the encoding.TextMarshaler interface.
+// The output is the result of t.String().
+func (q QuarterDate) MarshalText() ([]byte, error) {
+	return []byte(q.String()), nil
+}
+
+// UnmarshalText implements the encoding.TextUnmarshaler interface.
+// The quarter date is expected to be a string in a format accepted by ParseDate.
+func (q *QuarterDate) UnmarshalText(data []byte) error {
+	var err error
+	dt, err := ParseDate(data)
+	if err != nil {
+		return err
+	}
+	qd, ok := dt.(QuarterDate)
+	if !ok {
+		*q = dt.Date().QuarterDate()
+		return nil
+	}
+	*q = qd
+	return nil
+}
+
 // WeekDate represents a date within a specific week of a given year,
 // following the ISO 8601 week-date system. It includes the year,
 // week number (1 to 52 or 53), and day of the week (1 for Monday to 7 for Sunday).
@@ -508,7 +600,9 @@ type WeekDate struct {
 var _ interface {
 	DateLike
 	fmt.Stringer
-} = WeekDate{}
+	encoding.TextMarshaler
+	encoding.TextUnmarshaler
+} = (*WeekDate)(nil)
 
 // String returns the ISO8601 string representation of the format "YYYY-WX-DD".
 // For example: "2012-W52-1".
@@ -576,6 +670,29 @@ func (w WeekDate) Validate() error {
 	return nil
 }
 
+// MarshalText implements the encoding.TextMarshaler interface.
+// The output is the result of t.String().
+func (w WeekDate) MarshalText() ([]byte, error) {
+	return []byte(w.String()), nil
+}
+
+// UnmarshalText implements the encoding.TextUnmarshaler interface.
+// The week date is expected to be a string in a format accepted by ParseDate.
+func (w *WeekDate) UnmarshalText(data []byte) error {
+	var err error
+	dt, err := ParseDate(data)
+	if err != nil {
+		return err
+	}
+	wd, ok := dt.(WeekDate)
+	if !ok {
+		*w = dt.Date().WeekDate()
+		return nil
+	}
+	*w = wd
+	return nil
+}
+
 // OrdinalDate represents a date specified by its year and the day-of-year (ordinal date),
 // where the day-of-year ranges from 1 through 365 (or 366 in a leap year).
 type OrdinalDate struct {
@@ -586,7 +703,9 @@ type OrdinalDate struct {
 var _ interface {
 	DateLike
 	fmt.Stringer
-} = OrdinalDate{}
+	encoding.TextMarshaler
+	encoding.TextUnmarshaler
+} = (*OrdinalDate)(nil)
 
 // String returns the ISO8601 string representation of the format "YYYY-DDD".
 // For example: "2012-359".
@@ -634,6 +753,29 @@ func (o OrdinalDate) Validate() error {
 			Max:     daysInYear,
 		}
 	}
+	return nil
+}
+
+// MarshalText implements the encoding.TextMarshaler interface.
+// The output is the result of t.String().
+func (o OrdinalDate) MarshalText() ([]byte, error) {
+	return []byte(o.String()), nil
+}
+
+// UnmarshalText implements the encoding.TextUnmarshaler interface.
+// The week date is expected to be a string in a format accepted by ParseDate.
+func (o *OrdinalDate) UnmarshalText(data []byte) error {
+	var err error
+	dt, err := ParseDate(data)
+	if err != nil {
+		return err
+	}
+	od, ok := dt.(OrdinalDate)
+	if !ok {
+		*o = dt.Date().OrdinalDate()
+		return nil
+	}
+	*o = od
 	return nil
 }
 

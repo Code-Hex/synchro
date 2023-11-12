@@ -1,6 +1,7 @@
 package iso8601
 
 import (
+	"encoding/json"
 	"testing"
 	"time"
 
@@ -598,7 +599,7 @@ func TestTime_String(t *testing.T) {
 				Minute: 59,
 				Second: 59,
 			},
-			want: "12:59:59.000000000",
+			want: "12:59:59",
 		},
 		{
 			t: Time{
@@ -614,6 +615,241 @@ func TestTime_String(t *testing.T) {
 		t.Run(tt.want, func(t *testing.T) {
 			if got := tt.t.String(); got != tt.want {
 				t.Errorf("Time.String() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestTime_IsZero(t *testing.T) {
+	tests := []struct {
+		name string
+		t    Time
+		want bool
+	}{
+		{
+			name: "zero value",
+			t:    Time{},
+			want: true,
+		},
+		{
+			name: "non-zero value",
+			t: Time{
+				Hour: 12,
+			},
+			want: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.t.IsZero(); got != tt.want {
+				t.Errorf("Time.IsZero() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestTime_MarshalText(t *testing.T) {
+	tests := []struct {
+		t    Time
+		want string
+	}{
+		{
+			t: Time{
+				Hour:   12,
+				Minute: 59,
+				Second: 59,
+			},
+			want: "12:59:59",
+		},
+		{
+			t: Time{
+				Hour:       12,
+				Minute:     59,
+				Second:     59,
+				Nanosecond: 987654321,
+			},
+			want: "12:59:59.987654321",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.want, func(t *testing.T) {
+			got, err := tt.t.MarshalText()
+			if err != nil {
+				t.Fatal(err)
+			}
+			if string(got) != tt.want {
+				t.Errorf("Time.MarshalText() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestTime_Validate(t *testing.T) {
+	tests := []struct {
+		name    string
+		time    Time
+		wantErr bool
+	}{
+		{
+			name: "valid time",
+			time: Time{
+				Hour:       12,
+				Minute:     30,
+				Second:     15,
+				Nanosecond: 500000000,
+			},
+			wantErr: false,
+		},
+		{
+			name: "invalid hour",
+			time: Time{
+				Hour:       25,
+				Minute:     30,
+				Second:     15,
+				Nanosecond: 500000000,
+			},
+			wantErr: true,
+		},
+		{
+			name: "invalid minute",
+			time: Time{
+				Hour:       12,
+				Minute:     60,
+				Second:     15,
+				Nanosecond: 500000000,
+			},
+			wantErr: true,
+		},
+		{
+			name: "invalid second",
+			time: Time{
+				Hour:       12,
+				Minute:     30,
+				Second:     60,
+				Nanosecond: 500000000,
+			},
+			wantErr: true,
+		},
+		{
+			name: "invalid nanosecond",
+			time: Time{
+				Hour:       12,
+				Minute:     30,
+				Second:     15,
+				Nanosecond: 1000000000,
+			},
+			wantErr: true,
+		},
+		{
+			name: "valid edge case - 24:00:00",
+			time: Time{
+				Hour:       24,
+				Minute:     0,
+				Second:     0,
+				Nanosecond: 0,
+			},
+			wantErr: false,
+		},
+		{
+			name: "invalid edge case - 24:00:01",
+			time: Time{
+				Hour:       24,
+				Minute:     0,
+				Second:     1,
+				Nanosecond: 0,
+			},
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := tt.time.Validate()
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Time.Validate() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestTime_UnmarshalText(t *testing.T) {
+	tests := []struct {
+		s    string
+		want Time
+	}{
+		{
+			s: "12:59:59",
+			want: Time{
+				Hour:   12,
+				Minute: 59,
+				Second: 59,
+			},
+		},
+		{
+			s: "12:59:59.987654321",
+			want: Time{
+				Hour:       12,
+				Minute:     59,
+				Second:     59,
+				Nanosecond: 987654321,
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.s, func(t *testing.T) {
+			tm := &Time{}
+			err := tm.UnmarshalText([]byte(tt.s))
+			if err != nil {
+				t.Fatal(err)
+			}
+			if diff := cmp.Diff(tt.want, *tm); diff != "" {
+				t.Errorf("(-want, +got)\n%s", diff)
+			}
+		})
+	}
+
+	t.Run("invalid text", func(t *testing.T) {
+		tm := &Time{}
+		err := tm.UnmarshalText([]byte("invalid"))
+		if err == nil {
+			t.Fatal("expected error")
+		}
+	})
+}
+
+func TestTimeJSON(t *testing.T) {
+	tests := []struct {
+		name string
+		time Time
+	}{
+		{
+			name: "valid time",
+			time: Time{
+				Hour:       12,
+				Minute:     30,
+				Second:     15,
+				Nanosecond: 500000000,
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			bytes, err := json.Marshal(tt.time)
+			if err != nil {
+				t.Errorf("json.Marshal() error = %v", err)
+				return
+			}
+
+			var got Time
+			err = json.Unmarshal(bytes, &got)
+			if err != nil {
+				t.Errorf("json.Unmarshal() error = %v", err)
+				return
+			}
+
+			if diff := cmp.Diff(got, tt.time); diff != "" {
+				t.Errorf("(-want, +got)\n%s", diff)
 			}
 		})
 	}
