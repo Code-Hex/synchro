@@ -4,6 +4,7 @@ import (
 	"encoding"
 	"fmt"
 	"math"
+	"time"
 
 	"github.com/Code-Hex/synchro/internal/constraints"
 )
@@ -24,6 +25,15 @@ var _ interface {
 	encoding.TextUnmarshaler
 } = (*Time)(nil)
 
+// TimeOf returns the Time representing the time of day in which a time occurs
+// in that time's location. It ignores the date.
+func TimeOf(t time.Time) Time {
+	var tm Time
+	tm.Hour, tm.Minute, tm.Second = t.Clock()
+	tm.Nanosecond = t.Nanosecond()
+	return tm
+}
+
 // String returns the ISO8601 string representation of the format "hh:mm:dd".
 // For example: "12:59:59.123456789".
 func (t Time) String() string {
@@ -37,6 +47,25 @@ func (t Time) String() string {
 // IsZero reports whether time fields are set to their default value.
 func (t Time) IsZero() bool {
 	return (t.Hour == 0) && (t.Minute == 0) && (t.Second == 0) && (t.Nanosecond == 0)
+}
+
+// Before reports whether t occurs before t2.
+func (t Time) Before(t2 Time) bool {
+	if t.Hour != t2.Hour {
+		return t.Hour < t2.Hour
+	}
+	if t.Minute != t2.Minute {
+		return t.Minute < t2.Minute
+	}
+	if t.Second != t2.Second {
+		return t.Second < t2.Second
+	}
+	return t.Nanosecond < t2.Nanosecond
+}
+
+// After reports whether t occurs after t2.
+func (t Time) After(t2 Time) bool {
+	return t2.Before(t)
 }
 
 // MarshalText implements the encoding.TextMarshaler interface.
