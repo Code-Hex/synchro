@@ -22,6 +22,8 @@ This library is inspired by Rust [chrono](https://github.com/chronotope/chrono)
   - ✅ Durations
   - ✅ Time intervals
     - Repeating intervals
+  - Note: This package can be used as civil time.
+    - Civil time is a time-zone-independent representation of time that follows the rules of the proleptic Gregorian calendar with exactly 24-hour days, 60-minute hours, and 60-second minutes.
 
 ## Installation
 
@@ -89,8 +91,6 @@ If you have a feature request, please open an issue. It would be great if you co
 - [Advance](https://pkg.go.dev/github.com/Code-Hex/synchro#Time.Advance)
   - `Advance` allows you to specify the date and time components you want to increment and make modifications.
 - [Period](https://pkg.go.dev/github.com/Code-Hex/synchro#Period)
-- [Date](https://pkg.go.dev/github.com/Code-Hex/synchro#Date)
-  - Date type for civil time (ISO 8601 compatible).
 
 
 ## TODO
