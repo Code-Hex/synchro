@@ -70,6 +70,7 @@ If you have a feature request, please open an issue. It would be great if you co
 
 - [In](https://pkg.go.dev/github.com/Code-Hex/synchro#In)
 - [ConvertTz](https://pkg.go.dev/github.com/Code-Hex/synchro#ConvertTz)
+- [Strftime](https://pkg.go.dev/github.com/Code-Hex/synchro#Strftime)
 - [NowContext](https://pkg.go.dev/github.com/Code-Hex/synchro#NowContext)
 - [Quarter](https://pkg.go.dev/github.com/Code-Hex/synchro#Quarter)
 - [Semester](https://pkg.go.dev/github.com/Code-Hex/synchro#Semester)
