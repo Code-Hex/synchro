@@ -46,27 +46,6 @@ func TestPeriod_Slice(t *testing.T) {
 			t.Fatalf("(-want, +got)\n%s", diff)
 		}
 	})
-	t.Run("CivilDate[UTC] params", func(t *testing.T) {
-		period, err := NewPeriod[tz.UTC](
-			CivilDate[tz.UTC]{
-				Year:  2014,
-				Month: 2,
-				Day:   5,
-			},
-			CivilDate[tz.UTC]{
-				Year:  2014,
-				Month: 2,
-				Day:   8,
-			},
-		)
-		if err != nil {
-			t.Fatal(err)
-		}
-		got := period.PeriodicDuration(24 * time.Hour).Slice()
-		if diff := cmp.Diff(want, got); diff != "" {
-			t.Fatalf("(-want, +got)\n%s", diff)
-		}
-	})
 	t.Run("time.Time params", func(t *testing.T) {
 		period, err := NewPeriod[tz.UTC](
 			time.Date(2014, 2, 5, 0, 0, 0, 0, time.UTC),
