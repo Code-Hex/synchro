@@ -1373,6 +1373,12 @@ func TestOrdinalDate_Date(t *testing.T) {
 			if diff := cmp.Diff(tt.want, got); diff != "" {
 				t.Errorf("(-want, +got)\n%s", diff)
 			}
+
+			want := tt.o
+			got2 := got.OrdinalDate()
+			if diff := cmp.Diff(want, got2); diff != "" {
+				t.Errorf("(-want, +got)\n%s", diff)
+			}
 		})
 	}
 }
@@ -2194,6 +2200,12 @@ func TestQuarterDate_Date(t *testing.T) {
 			if diff := cmp.Diff(tt.want, got); diff != "" {
 				t.Errorf("(-want, +got)\n%s", diff)
 			}
+
+			want := tt.q
+			got2 := got.QuarterDate()
+			if diff := cmp.Diff(want, got2); diff != "" {
+				t.Errorf("(-want, +got)\n%s", diff)
+			}
 		})
 	}
 }
@@ -2825,6 +2837,12 @@ func TestWeekDate_Date(t *testing.T) {
 				g := time.Date(got.Year, got.Month, got.Day, 0, 0, 0, 0, time.UTC)
 				t.Errorf("(-want, +got)\n%s- %q (%s)\n+ %q (%s)", diff, w, w.Weekday(), g, g.Weekday())
 			}
+
+			want := tt.w
+			got2 := got.WeekDate()
+			if diff := cmp.Diff(want, got2); diff != "" {
+				t.Errorf("(-want, +got)\n%s", diff)
+			}
 		})
 	}
 }
@@ -3295,10 +3313,14 @@ func TestQuarterDate_UnmarshalText(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:    "invalid quarter format",
-			data:    "2023-11-12",
-			want:    QuarterDate{},
-			wantErr: true,
+			name: "valid non quarter date format but convertable",
+			data: "2023-11-12",
+			want: QuarterDate{
+				Year:    2023,
+				Quarter: 4,
+				Day:     43,
+			},
+			wantErr: false,
 		},
 	}
 	for _, tt := range tests {
@@ -3308,7 +3330,7 @@ func TestQuarterDate_UnmarshalText(t *testing.T) {
 			if (err != nil) != tt.wantErr {
 				t.Fatalf("QuarterDate.UnmarshalText() error = %v, wantErr %v", err, tt.wantErr)
 			}
-			if diff := cmp.Diff(got, tt.want); diff != "" {
+			if diff := cmp.Diff(tt.want, got); diff != "" {
 				t.Fatalf("(-want, +got)\n%s", diff)
 			}
 		})
@@ -3339,10 +3361,14 @@ func TestWeekDate_UnmarshalText(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:    "invalid week format",
-			data:    "2023-11-12",
-			want:    WeekDate{},
-			wantErr: true,
+			name: "valid non week date format but convertable",
+			data: "2023-11-12",
+			want: WeekDate{
+				Year: 2023,
+				Week: 45,
+				Day:  7,
+			},
+			wantErr: false,
 		},
 	}
 	for _, tt := range tests {
@@ -3352,7 +3378,7 @@ func TestWeekDate_UnmarshalText(t *testing.T) {
 			if (err != nil) != tt.wantErr {
 				t.Fatalf("WeekDate.UnmarshalText() error = %v, wantErr %v", err, tt.wantErr)
 			}
-			if diff := cmp.Diff(got, tt.want); diff != "" {
+			if diff := cmp.Diff(tt.want, got); diff != "" {
 				t.Fatalf("(-want, +got)\n%s", diff)
 			}
 		})
@@ -3382,10 +3408,13 @@ func TestOrdinalDate_UnmarshalText(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:    "invalid ordinal format",
-			data:    "2023-11-12",
-			want:    OrdinalDate{},
-			wantErr: true,
+			name: "valid non ordinal date format but convertable",
+			data: "2023-11-12",
+			want: OrdinalDate{
+				Year: 2023,
+				Day:  316,
+			},
+			wantErr: false,
 		},
 	}
 	for _, tt := range tests {
@@ -3395,7 +3424,7 @@ func TestOrdinalDate_UnmarshalText(t *testing.T) {
 			if (err != nil) != tt.wantErr {
 				t.Fatalf("OrdinalDate.UnmarshalText() error = %v, wantErr %v", err, tt.wantErr)
 			}
-			if diff := cmp.Diff(got, tt.want); diff != "" {
+			if diff := cmp.Diff(tt.want, got); diff != "" {
 				t.Fatalf("(-want, +got)\n%s", diff)
 			}
 		})

@@ -425,6 +425,52 @@ func (d Date) StdTime() time.Time {
 	return time.Date(d.Year, d.Month, d.Day, 0, 0, 0, 0, time.UTC)
 }
 
+// QuarterDate converts a Date to a QuarterDate.
+// It calculates the quarter of the year and the day within that quarter for the given date.
+func (d Date) QuarterDate() QuarterDate {
+	t := time.Date(d.Year, d.Month, d.Day, 0, 0, 0, 0, time.UTC)
+	yday := t.YearDay() // 1 ~ 366
+
+	quarter := 1
+	for yday > daysInQuarter(d.Year, quarter) {
+		yday -= daysInQuarter(d.Year, quarter)
+		quarter++
+	}
+
+	return QuarterDate{
+		Year:    d.Year,
+		Quarter: quarter,
+		Day:     yday,
+	}
+}
+
+// WeekDate converts a Date to a WeekDate.
+// It calculates the week of the year and the day within that week for the given date.
+func (d Date) WeekDate() WeekDate {
+	t := time.Date(d.Year, d.Month, d.Day, 0, 0, 0, 0, time.UTC)
+	year, week := t.ISOWeek()
+	day := int(t.Weekday())
+	if day == 0 {
+		day = 7
+	}
+	return WeekDate{
+		Year: year,
+		Week: week,
+		Day:  day,
+	}
+}
+
+// OrdinalDate converts a Date to an OrdinalDate.
+// It calculates the day of the year for the given date.
+func (d Date) OrdinalDate() OrdinalDate {
+	t := time.Date(d.Year, d.Month, d.Day, 0, 0, 0, 0, time.UTC)
+	yday := t.YearDay() // 1 ~ 366
+	return OrdinalDate{
+		Year: d.Year,
+		Day:  yday,
+	}
+}
+
 // MarshalText implements the encoding.TextMarshaler interface.
 // The output is the result of t.String().
 func (d Date) MarshalText() ([]byte, error) {
@@ -535,7 +581,8 @@ func (q *QuarterDate) UnmarshalText(data []byte) error {
 	}
 	qd, ok := dt.(QuarterDate)
 	if !ok {
-		return fmt.Errorf("unexpected date format %s", dt)
+		*q = dt.Date().QuarterDate()
+		return nil
 	}
 	*q = qd
 	return nil
@@ -639,7 +686,8 @@ func (w *WeekDate) UnmarshalText(data []byte) error {
 	}
 	wd, ok := dt.(WeekDate)
 	if !ok {
-		return fmt.Errorf("unexpected date format %s", dt)
+		*w = dt.Date().WeekDate()
+		return nil
 	}
 	*w = wd
 	return nil
@@ -724,7 +772,8 @@ func (o *OrdinalDate) UnmarshalText(data []byte) error {
 	}
 	od, ok := dt.(OrdinalDate)
 	if !ok {
-		return fmt.Errorf("unexpected date format %s", dt)
+		*o = dt.Date().OrdinalDate()
+		return nil
 	}
 	*o = od
 	return nil
