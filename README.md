@@ -70,7 +70,6 @@ If you have a feature request, please open an issue. It would be great if you co
 
 - [In](https://pkg.go.dev/github.com/Code-Hex/synchro#In)
 - [ConvertTz](https://pkg.go.dev/github.com/Code-Hex/synchro#ConvertTz)
-- [Strftime](https://pkg.go.dev/github.com/Code-Hex/synchro#Strftime)
 - [NowContext](https://pkg.go.dev/github.com/Code-Hex/synchro#NowContext)
 - [Quarter](https://pkg.go.dev/github.com/Code-Hex/synchro#Quarter)
 - [Semester](https://pkg.go.dev/github.com/Code-Hex/synchro#Semester)
@@ -92,6 +91,8 @@ If you have a feature request, please open an issue. It would be great if you co
 - [Advance](https://pkg.go.dev/github.com/Code-Hex/synchro#Time.Advance)
   - `Advance` allows you to specify the date and time components you want to increment and make modifications.
 - [Period](https://pkg.go.dev/github.com/Code-Hex/synchro#Period)
+- [Strptime](https://pkg.go.dev/github.com/Code-Hex/synchro#Strptime)
+- [Strftime](https://pkg.go.dev/github.com/Code-Hex/synchro#Time.Strftime)
 
 
 ## TODO
