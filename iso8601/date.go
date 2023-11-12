@@ -370,6 +370,13 @@ var _ interface {
 	encoding.TextUnmarshaler
 } = (*Date)(nil)
 
+// DateOf returns the iso8601 Date in which a time occurs in that time's location.
+func DateOf(t time.Time) Date {
+	var d Date
+	d.Year, d.Month, d.Day = t.Date()
+	return d
+}
+
 // String returns the ISO8601 string representation of the format "YYYY-MM-DD".
 // For example: "2012-12-01".
 func (d Date) String() string {
@@ -422,7 +429,61 @@ func (d Date) Validate() error {
 
 // StdTime converts the Date structure to a time.Time object, using UTC for the time.
 func (d Date) StdTime() time.Time {
-	return time.Date(d.Year, d.Month, d.Day, 0, 0, 0, 0, time.UTC)
+	return d.In(time.UTC)
+}
+
+// In returns the time corresponding to time 00:00:00 of the date in the location.
+//
+// In is always consistent with time.Date, even when time.Date returns a time
+// on a different day. For example, if loc is America/Indiana/Vincennes, then both
+//
+//	time.Date(1955, time.May, 1, 0, 0, 0, 0, loc)
+//
+// and
+//
+//	iso8601.Date{Year: 1955, Month: time.May, Day: 1}.In(loc)
+//
+// return 23:00:00 on April 30, 1955.
+//
+// In panics if loc is nil.
+func (d Date) In(loc *time.Location) time.Time {
+	return time.Date(d.Year, d.Month, d.Day, 0, 0, 0, 0, loc)
+}
+
+// AddDays returns the date that is n days in the future.
+// n can also be negative to go into the past.
+func (d Date) AddDays(n int) Date {
+	return DateOf(d.StdTime().AddDate(0, 0, n))
+}
+
+// DaysSince returns the signed number of days between the date and s, not including the end day.
+// This is the inverse operation to AddDays.
+func (d Date) DaysSince(s Date) (days int) {
+	// We convert to Unix time so we do not have to worry about leap seconds:
+	// Unix time increases by exactly 86400 seconds per day.
+	deltaUnix := d.StdTime().Unix() - s.StdTime().Unix()
+	return int(deltaUnix / 86400)
+}
+
+// Before reports whether d occurs before d2.
+func (d Date) Before(d2 Date) bool {
+	if d.Year != d2.Year {
+		return d.Year < d2.Year
+	}
+	if d.Month != d2.Month {
+		return d.Month < d2.Month
+	}
+	return d.Day < d2.Day
+}
+
+// After reports whether d occurs after d2.
+func (d Date) After(d2 Date) bool {
+	return d2.Before(d)
+}
+
+// IsZero reports whether date fields are set to their default value.
+func (d Date) IsZero() bool {
+	return (d.Year == 0) && (int(d.Month) == 0) && (d.Day == 0)
 }
 
 // QuarterDate converts a Date to a QuarterDate.

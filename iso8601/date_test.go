@@ -3430,3 +3430,111 @@ func TestOrdinalDate_UnmarshalText(t *testing.T) {
 		})
 	}
 }
+
+func TestDateArithmetic(t *testing.T) {
+	for _, test := range []struct {
+		desc  string
+		start Date
+		end   Date
+		days  int
+	}{
+		{
+			desc:  "zero days noop",
+			start: Date{2014, 5, 9},
+			end:   Date{2014, 5, 9},
+			days:  0,
+		},
+		{
+			desc:  "crossing a year boundary",
+			start: Date{2014, 12, 31},
+			end:   Date{2015, 1, 1},
+			days:  1,
+		},
+		{
+			desc:  "negative number of days",
+			start: Date{2015, 1, 1},
+			end:   Date{2014, 12, 31},
+			days:  -1,
+		},
+		{
+			desc:  "full leap year",
+			start: Date{2004, 1, 1},
+			end:   Date{2005, 1, 1},
+			days:  366,
+		},
+		{
+			desc:  "full non-leap year",
+			start: Date{2001, 1, 1},
+			end:   Date{2002, 1, 1},
+			days:  365,
+		},
+		{
+			desc:  "crossing a leap second",
+			start: Date{1972, 6, 30},
+			end:   Date{1972, 7, 1},
+			days:  1,
+		},
+		{
+			desc:  "dates before the unix epoch",
+			start: Date{101, 1, 1},
+			end:   Date{102, 1, 1},
+			days:  365,
+		},
+	} {
+		if got := test.start.AddDays(test.days); got != test.end {
+			t.Errorf("[%s] %#v.AddDays(%v) = %#v, want %#v", test.desc, test.start, test.days, got, test.end)
+		}
+		if got := test.end.DaysSince(test.start); got != test.days {
+			t.Errorf("[%s] %#v.Sub(%#v) = %v, want %v", test.desc, test.end, test.start, got, test.days)
+		}
+	}
+}
+
+func TestDateBefore(t *testing.T) {
+	for _, test := range []struct {
+		d1, d2 Date
+		want   bool
+	}{
+		{Date{2016, 12, 31}, Date{2017, 1, 1}, true},
+		{Date{2016, 11, 30}, Date{2016, 12, 30}, true},
+		{Date{2016, 1, 1}, Date{2016, 1, 1}, false},
+		{Date{2016, 12, 30}, Date{2016, 12, 31}, true},
+	} {
+		if got := test.d1.Before(test.d2); got != test.want {
+			t.Errorf("%v.Before(%v): got %t, want %t", test.d1, test.d2, got, test.want)
+		}
+	}
+}
+
+func TestDateAfter(t *testing.T) {
+	for _, test := range []struct {
+		d1, d2 Date
+		want   bool
+	}{
+		{Date{2016, 12, 31}, Date{2017, 1, 1}, false},
+		{Date{2016, 1, 1}, Date{2016, 1, 1}, false},
+		{Date{2016, 12, 30}, Date{2016, 12, 31}, false},
+	} {
+		if got := test.d1.After(test.d2); got != test.want {
+			t.Errorf("%v.After(%v): got %t, want %t", test.d1, test.d2, got, test.want)
+		}
+	}
+}
+
+func TestDateIsZero(t *testing.T) {
+	for _, test := range []struct {
+		date Date
+		want bool
+	}{
+		{Date{2000, 2, 29}, false},
+		{Date{10000, 12, 31}, false},
+		{Date{-1, 0, 0}, false},
+		{Date{0, 0, 0}, true},
+		{Date{}, true},
+	} {
+		got := test.date.IsZero()
+		if got != test.want {
+			t.Errorf("%#v: got %t, want %t", test.date, got, test.want)
+		}
+	}
+}
