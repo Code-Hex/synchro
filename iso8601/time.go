@@ -1,6 +1,7 @@
 package iso8601
 
 import (
+	"encoding"
 	"fmt"
 	"math"
 
@@ -11,27 +12,55 @@ import (
 //
 // Note: The time '24:00:00' is valid and represents midnight at the end of the given day.
 type Time struct {
-	Hour       int
-	Minute     int
-	Second     int
-	Nanosecond int
+	Hour       int // The hour values between 0 and 23 inclusive, with an exception for the '24:00:00' time.
+	Minute     int // The minute of the hour; range [0-59]
+	Second     int // The second of the minute; range [0-59]
+	Nanosecond int // The nanosecond of the second; range [0-999999999]
 }
 
-var _ fmt.Stringer = Time{}
+var _ interface {
+	fmt.Stringer
+	encoding.TextMarshaler
+	encoding.TextUnmarshaler
+} = (*Time)(nil)
 
 // String returns the ISO8601 string representation of the format "hh:mm:dd".
 // For example: "12:59:59.123456789".
 func (t Time) String() string {
-	return fmt.Sprintf("%02d:%02d:%02d.%09d", t.Hour, t.Minute, t.Second, t.Nanosecond)
+	s := fmt.Sprintf("%02d:%02d:%02d", t.Hour, t.Minute, t.Second)
+	if t.Nanosecond == 0 {
+		return s
+	}
+	return s + fmt.Sprintf(".%09d", t.Nanosecond)
+}
+
+// IsZero reports whether time fields are set to their default value.
+func (t Time) IsZero() bool {
+	return (t.Hour == 0) && (t.Minute == 0) && (t.Second == 0) && (t.Nanosecond == 0)
+}
+
+// MarshalText implements the encoding.TextMarshaler interface.
+// The output is the result of t.String().
+func (t Time) MarshalText() ([]byte, error) {
+	return []byte(t.String()), nil
+}
+
+// UnmarshalText implements the encoding.TextUnmarshaler interface.
+// The time is expected to be a string in a format accepted by ParseTime.
+func (t *Time) UnmarshalText(data []byte) error {
+	var err error
+	*t, err = ParseTime(data)
+	return err
 }
 
 // Validate checks the individual components of the time (hour, minute, second, and nanosecond)
 // against their respective valid ISO8601 ranges.
 //
 // Specifically, it validates:
+//   - Hour values between 0 and 23 inclusive, with an exception for the '24:00:00' time.
 //   - Minute values between 0 and 59 inclusive.
 //   - Second values between 0 and 59 inclusive.
-//   - Hour values between 0 and 23 inclusive, with an exception for the '24:00:00' time.
+//   - Nanosecond values range [0-999999999]
 //
 // Returns an error if any of the components are out of their expected ranges.
 func (t Time) Validate() error {
@@ -49,6 +78,14 @@ func (t Time) Validate() error {
 			Value:   t.Second,
 			Min:     0,
 			Max:     59,
+		}
+	}
+	if t.Nanosecond < 0 || t.Nanosecond > 999999999 {
+		return &TimeRangeError{
+			Element: "nanosecond",
+			Value:   t.Nanosecond,
+			Min:     0,
+			Max:     999999999,
 		}
 	}
 	if t.Hour < 0 || t.Hour > 23 {
