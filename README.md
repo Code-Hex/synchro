@@ -1,8 +1,8 @@
-# 🕰️ Synchro: Timezone-typesafe date and time library for Go
+# 🕰️ Synchro: Timezone-typesafe date and time framework for Go
 
 [![test](https://github.com/Code-Hex/synchro/actions/workflows/test.yml/badge.svg)](https://github.com/Code-Hex/synchro/actions/workflows/test.yml) [![codecov](https://codecov.io/gh/Code-Hex/synchro/graph/badge.svg?token=VWPbmNRHw8)](https://codecov.io/gh/Code-Hex/synchro) [![Go Reference](https://pkg.go.dev/badge/github.com/Code-Hex/synchro/.svg)](https://pkg.go.dev/github.com/Code-Hex/synchro/)
 
-This library is inspired by Rust [chrono](https://github.com/chronotope/chrono)
+This is inspired by Rust [chrono](https://github.com/chronotope/chrono)
 
 ## Features
 
@@ -22,6 +22,8 @@ This library is inspired by Rust [chrono](https://github.com/chronotope/chrono)
   - ✅ Durations
   - ✅ Time intervals
     - Repeating intervals
+  - Note: This package can be used as civil time.
+    - Civil time is a time-zone-independent representation of time that follows the rules of the proleptic Gregorian calendar with exactly 24-hour days, 60-minute hours, and 60-second minutes.
 
 ## Installation
 
@@ -89,8 +91,6 @@ If you have a feature request, please open an issue. It would be great if you co
 - [Advance](https://pkg.go.dev/github.com/Code-Hex/synchro#Time.Advance)
   - `Advance` allows you to specify the date and time components you want to increment and make modifications.
 - [Period](https://pkg.go.dev/github.com/Code-Hex/synchro#Period)
-- [Date](https://pkg.go.dev/github.com/Code-Hex/synchro#Date)
-  - Date type for civil time (ISO 8601 compatible).
 
 
 ## TODO
