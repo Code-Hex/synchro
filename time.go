@@ -10,8 +10,8 @@ import (
 type empty[T TimeZone] struct{}
 
 type Time[T TimeZone] struct {
-	tm time.Time
 	_  empty[T]
+	tm time.Time
 }
 
 // StdTime returns the time.Time.
