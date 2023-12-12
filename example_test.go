@@ -370,7 +370,7 @@ func ExampleConvertTz() {
 	utc := synchro.New[tz.UTC](2009, time.November, 10, 23, 0, 0, 0)
 	fmt.Printf("Go launched at %s\n", utc)
 
-	jst := synchro.ConvertTz[tz.UTC, tz.AsiaTokyo](utc)
+	jst := synchro.ConvertTz[tz.AsiaTokyo](utc)
 	fmt.Printf("Go launched at %s\n", jst)
 	// Output:
 	// Go launched at 2009-11-10 23:00:00 +0000 UTC
