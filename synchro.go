@@ -163,6 +163,6 @@ func After[T TimeZone](d time.Duration) <-chan Time[T] {
 //
 // For example to convert from UTC to Asia/Tokyo.
 // If `2009-11-10 23:00:00 +0000 UTC` as input, the output will be `2009-11-11 08:00:00 +0900 Asia/Tokyo`.
-func ConvertTz[T TimeZone, U TimeZone](from Time[T]) Time[U] {
+func ConvertTz[U TimeZone, T TimeZone](from Time[T]) Time[U] {
 	return In[U](from.tm)
 }
