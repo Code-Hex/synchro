@@ -5,7 +5,6 @@ import "time"
 type Semester[T TimeZone] struct {
 	year   int
 	number int
-	t      Time[T]
 }
 
 // Semester gets current semester.
@@ -13,7 +12,6 @@ func (t Time[T]) Semester() Semester[T] {
 	return Semester[T]{
 		year:   t.Year(),
 		number: numberOfSemester(t.Month()),
-		t:      t,
 	}
 }
 
@@ -24,10 +22,24 @@ func (s Semester[T]) Year() int { return s.year }
 func (s Semester[T]) Number() int { return s.number }
 
 // Start returns start time in the semester.
-func (s Semester[T]) Start() Time[T] { return s.t.StartOfSemester() }
+func (s Semester[T]) Start() Time[T] {
+	year, semester, day := s.year, s.number, 1
+	month := time.January
+	if semester == 2 {
+		month = time.July
+	}
+	return New[T](year, month, day, 0, 0, 0, 0)
+}
 
 // End returns end time in the semester.
-func (s Semester[T]) End() Time[T] { return s.t.EndOfSemester() }
+func (s Semester[T]) End() Time[T] {
+	year, semester := s.year, s.number
+	month, day := time.June, 30
+	if semester == 2 {
+		month, day = time.December, 31
+	}
+	return New[T](year, month, day, 23, 59, 59, 999999999)
+}
 
 // After reports whether the Semester instant s is after u.
 func (s Semester[T]) After(u Semester[T]) bool {
