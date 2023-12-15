@@ -1,12 +1,20 @@
 package iso8601
 
 import (
+	"encoding"
 	"encoding/json"
+	"fmt"
 	"testing"
 	"time"
 
 	"github.com/google/go-cmp/cmp"
 )
+
+var _ interface {
+	fmt.Stringer
+	encoding.TextMarshaler
+	encoding.TextUnmarshaler
+} = (*Time)(nil)
 
 func TestParseTime(t *testing.T) {
 	tests := []struct {

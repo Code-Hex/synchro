@@ -2,6 +2,8 @@ package iso8601
 
 import "testing"
 
+var _ error = (*UnexpectedTokenError)(nil)
+
 func TestUnexpectedTokenError_Error(t *testing.T) {
 	tests := []struct {
 		err  *UnexpectedTokenError
