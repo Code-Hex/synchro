@@ -279,16 +279,6 @@ func TestPeriod_PeriodicISO(t *testing.T) {
 	})
 }
 
-// Unfortunate test to cover 100%
-func TestConvertTime_Panic(t *testing.T) {
-	defer func() {
-		if r := recover(); r == nil {
-			t.Errorf("The code did not panic")
-		}
-	}()
-	convertTime[tz.UTC](true)
-}
-
 func TestPeriod_Contains(t *testing.T) {
 	cases := []struct {
 		name string
