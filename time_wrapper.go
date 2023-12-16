@@ -1,27 +1,10 @@
 package synchro
 
 import (
-	"encoding"
-	"encoding/gob"
-	"encoding/json"
-	"fmt"
 	"time"
 
 	"github.com/Code-Hex/synchro/tz"
 )
-
-var _ interface {
-	fmt.Stringer
-	fmt.GoStringer
-	gob.GobEncoder
-	gob.GobDecoder
-	json.Marshaler
-	json.Unmarshaler
-	encoding.TextMarshaler
-	encoding.TextUnmarshaler
-	encoding.BinaryMarshaler
-	encoding.BinaryUnmarshaler
-} = (*Time[tz.UTC])(nil)
 
 // Local returns t with the location set to local time.
 func (t Time[T]) Local() Time[tz.Local] {

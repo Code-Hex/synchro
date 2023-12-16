@@ -1,6 +1,7 @@
 package synchro_test
 
 import (
+	"database/sql"
 	"database/sql/driver"
 	"testing"
 	"time"
@@ -8,6 +9,16 @@ import (
 	"github.com/Code-Hex/synchro"
 	"github.com/Code-Hex/synchro/tz"
 )
+
+var _ interface {
+	sql.Scanner
+	driver.Valuer
+} = (*synchro.Time[tz.UTC])(nil)
+
+var _ interface {
+	sql.Scanner
+	driver.Valuer
+} = (*synchro.NullTime[tz.UTC])(nil)
 
 func TestTime_Scan(t *testing.T) {
 	t.Run("UTC", func(t *testing.T) {

@@ -17,8 +17,6 @@ type UnexpectedTokenError struct {
 	Expected   string
 }
 
-var _ error = (*UnexpectedTokenError)(nil)
-
 // Error implements the error interface.
 func (u *UnexpectedTokenError) Error() string {
 	var buf strings.Builder
