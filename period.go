@@ -189,7 +189,9 @@ func convertTime[T TimeZone, argType timeish[T]](argPtr unsafe.Pointer) (Time[T]
 	case time.Time:
 		return In[T](*(*time.Time)(argPtr)), nil
 	case []byte:
-		return ParseISO[T](string(*(*[]byte)(argPtr)))
+		bytes := *(*[]byte)(argPtr)
+		str := unsafe.String(unsafe.SliceData(bytes), len(bytes))
+		return ParseISO[T](str)
 	default:
 		// argType is ~string, argPtr can be safely converted to *string
 		return ParseISO[T](*(*string)(argPtr))
