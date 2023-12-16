@@ -2,8 +2,8 @@ package synchro
 
 import (
 	"fmt"
-	"reflect"
 	"time"
+	"unsafe"
 
 	"github.com/Code-Hex/synchro/internal/constraints"
 	"github.com/Code-Hex/synchro/iso8601"
@@ -12,8 +12,6 @@ import (
 type timeish[T TimeZone] interface {
 	Time[T] | time.Time | constraints.Bytes
 }
-
-var stringType = reflect.TypeOf("")
 
 // Period allows iteration over a set of dates and times,
 // recurring at regular intervals, over a given period.
@@ -39,11 +37,11 @@ func (p Period[T]) To() Time[T] { return p.to }
 // When a string or []byte is passed, ParseISO function is called internally. Therefore, these
 // parameters should be in a format compatible with ParseISO.
 func NewPeriod[T TimeZone, T1 timeish[T], T2 timeish[T]](from T1, to T2) (Period[T], error) {
-	start, err := convertTime[T](any(from))
+	start, err := convertTime[T, T1](unsafe.Pointer(&from))
 	if err != nil {
 		return Period[T]{}, fmt.Errorf("failed to parse from: %w", err)
 	}
-	end, err := convertTime[T](any(to))
+	end, err := convertTime[T, T2](unsafe.Pointer(&to))
 	if err != nil {
 		return Period[T]{}, fmt.Errorf("failed to parse to: %w", err)
 	}
@@ -183,21 +181,19 @@ func (p Period[T]) PeriodicISODuration(duration string) (periodical[T], error) {
 	}), nil
 }
 
-func convertTime[T TimeZone](arg any) (Time[T], error) {
-	switch v := arg.(type) {
+func convertTime[T TimeZone, argType timeish[T]](argPtr unsafe.Pointer) (Time[T], error) {
+	var dummy argType
+	switch any(dummy).(type) {
 	case Time[T]:
-		return v, nil
+		return *(*Time[T])(argPtr), nil
 	case time.Time:
-		return In[T](v), nil
-	case string:
-		return ParseISO[T](v)
+		return In[T](*(*time.Time)(argPtr)), nil
 	case []byte:
-		return ParseISO[T](string(v))
+		bytes := *(*[]byte)(argPtr)
+		str := unsafe.String(unsafe.SliceData(bytes), len(bytes))
+		return ParseISO[T](str)
 	default:
-		rv := reflect.ValueOf(v)
-		if rv.CanConvert(stringType) {
-			return ParseISO[T](rv.Convert(stringType).String())
-		}
-		panic("unreachable")
+		// argType is ~string, argPtr can be safely converted to *string
+		return ParseISO[T](*(*string)(argPtr))
 	}
 }
