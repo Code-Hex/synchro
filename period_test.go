@@ -1,6 +1,7 @@
 package synchro
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 	"time"
@@ -9,6 +10,10 @@ import (
 	"github.com/Code-Hex/synchro/tz"
 	"github.com/google/go-cmp/cmp"
 )
+
+var _ interface {
+	fmt.Stringer
+} = (*Period[tz.UTC])(nil)
 
 func TestNewPeriod(t *testing.T) {
 	t.Run("want error for from", func(t *testing.T) {

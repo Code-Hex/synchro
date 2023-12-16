@@ -1,12 +1,41 @@
 package iso8601
 
 import (
+	"encoding"
 	"fmt"
 	"testing"
 	"time"
 
 	"github.com/google/go-cmp/cmp"
 )
+
+var _ interface {
+	DateLike
+	fmt.Stringer
+	encoding.TextMarshaler
+	encoding.TextUnmarshaler
+} = (*Date)(nil)
+
+var _ interface {
+	DateLike
+	fmt.Stringer
+	encoding.TextMarshaler
+	encoding.TextUnmarshaler
+} = (*QuarterDate)(nil)
+
+var _ interface {
+	DateLike
+	fmt.Stringer
+	encoding.TextMarshaler
+	encoding.TextUnmarshaler
+} = (*WeekDate)(nil)
+
+var _ interface {
+	DateLike
+	fmt.Stringer
+	encoding.TextMarshaler
+	encoding.TextUnmarshaler
+} = (*OrdinalDate)(nil)
 
 func Test_ParseDate(t *testing.T) {
 	tests := []struct {

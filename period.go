@@ -7,7 +7,6 @@ import (
 
 	"github.com/Code-Hex/synchro/internal/constraints"
 	"github.com/Code-Hex/synchro/iso8601"
-	"github.com/Code-Hex/synchro/tz"
 )
 
 type timeish[T TimeZone] interface {
@@ -20,10 +19,6 @@ type Period[T TimeZone] struct {
 	from Time[T]
 	to   Time[T]
 }
-
-var _ interface {
-	fmt.Stringer
-} = (*Period[tz.UTC])(nil)
 
 // String implements the fmt.Stringer interface.
 func (p Period[T]) String() string {

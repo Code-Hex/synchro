@@ -1,7 +1,6 @@
 package iso8601
 
 import (
-	"encoding"
 	"fmt"
 	"math"
 	"time"
@@ -18,12 +17,6 @@ type Time struct {
 	Second     int // The second of the minute; range [0-59]
 	Nanosecond int // The nanosecond of the second; range [0-999999999]
 }
-
-var _ interface {
-	fmt.Stringer
-	encoding.TextMarshaler
-	encoding.TextUnmarshaler
-} = (*Time)(nil)
 
 // TimeOf returns the Time representing the time of day in which a time occurs
 // in that time's location. It ignores the date.

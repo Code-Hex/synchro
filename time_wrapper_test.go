@@ -2,6 +2,7 @@ package synchro_test
 
 import (
 	"bytes"
+	"encoding"
 	"encoding/gob"
 	"encoding/json"
 	"fmt"
@@ -13,6 +14,19 @@ import (
 	"github.com/Code-Hex/synchro"
 	"github.com/Code-Hex/synchro/tz"
 )
+
+var _ interface {
+	fmt.Stringer
+	fmt.GoStringer
+	gob.GobEncoder
+	gob.GobDecoder
+	json.Marshaler
+	json.Unmarshaler
+	encoding.TextMarshaler
+	encoding.TextUnmarshaler
+	encoding.BinaryMarshaler
+	encoding.BinaryUnmarshaler
+} = (*synchro.Time[tz.UTC])(nil)
 
 func TestMain(m *testing.M) {
 	os.Setenv("TZ", "America/Los_Angeles")

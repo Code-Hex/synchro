@@ -5,7 +5,6 @@ import "time"
 type Quarter[T TimeZone] struct {
 	year   int
 	number int
-	t      Time[T]
 }
 
 // Quarter gets current quarter.
@@ -13,7 +12,6 @@ func (t Time[T]) Quarter() Quarter[T] {
 	return Quarter[T]{
 		year:   t.Year(),
 		number: numberOfQuarter(t.Month()),
-		t:      t,
 	}
 }
 
@@ -24,10 +22,21 @@ func (q Quarter[T]) Year() int { return q.year }
 func (q Quarter[T]) Number() int { return q.number }
 
 // Start returns start time in the quarter.
-func (q Quarter[T]) Start() Time[T] { return q.t.StartOfQuarter() }
+func (q Quarter[T]) Start() Time[T] {
+	year, quarter, day := q.year, q.number, 1
+	return New[T](year, time.Month(3*quarter-2), day, 0, 0, 0, 0)
+}
 
 // End returns end time in the quarter.
-func (q Quarter[T]) End() Time[T] { return q.t.EndOfQuarter() }
+func (q Quarter[T]) End() Time[T] {
+	year, quarter := q.year, q.number
+	day := 31
+	switch quarter {
+	case 2, 3:
+		day = 30
+	}
+	return New[T](year, time.Month(3*quarter), day, 23, 59, 59, 999999999)
+}
 
 // After reports whether the Quarter instant q is after u.
 func (q Quarter[T]) After(u Quarter[T]) bool {

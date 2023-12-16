@@ -54,39 +54,22 @@ func (t Time[T]) EndOfWeek() Time[T] {
 
 // StartOfQuarter returns a Time for start of the quarter.
 func (t Time[T]) StartOfQuarter() Time[T] {
-	year, quarter, day := t.Year(), numberOfQuarter(t.Month()), 1
-	return New[T](year, time.Month(3*quarter-2), day, 0, 0, 0, 0)
+	return t.Quarter().Start()
 }
 
 // EndOfQuarter returns a Time for end of the quarter.
 func (t Time[T]) EndOfQuarter() Time[T] {
-	year, quarter := t.Year(), numberOfQuarter(t.Month())
-	day := 31
-	switch quarter {
-	case 2, 3:
-		day = 30
-	}
-	return New[T](year, time.Month(3*quarter), day, 23, 59, 59, 999999999)
+	return t.Quarter().End()
 }
 
 // StartOfSemester returns a Time for start of the semester.
 func (t Time[T]) StartOfSemester() Time[T] {
-	year, semester, day := t.Year(), numberOfSemester(t.Month()), 1
-	month := time.January
-	if semester == 2 {
-		month = time.July
-	}
-	return New[T](year, month, day, 0, 0, 0, 0)
+	return t.Semester().Start()
 }
 
 // EndOfSemester returns a Time for end of the semester.
 func (t Time[T]) EndOfSemester() Time[T] {
-	year, semester := t.Year(), numberOfSemester(t.Month())
-	month, day := time.June, 30
-	if semester == 2 {
-		month, day = time.December, 31
-	}
-	return New[T](year, month, day, 23, 59, 59, 999999999)
+	return t.Semester().End()
 }
 
 // IsLeapYear returns true if t is leap year.

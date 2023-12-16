@@ -1,7 +1,6 @@
 package iso8601
 
 import (
-	"encoding"
 	"fmt"
 	"math"
 	"strconv"
@@ -363,13 +362,6 @@ type Date struct {
 	Day   int
 }
 
-var _ interface {
-	DateLike
-	fmt.Stringer
-	encoding.TextMarshaler
-	encoding.TextUnmarshaler
-} = (*Date)(nil)
-
 // DateOf returns the iso8601 Date in which a time occurs in that time's location.
 func DateOf(t time.Time) Date {
 	var d Date
@@ -558,13 +550,6 @@ type QuarterDate struct {
 	Day     int
 }
 
-var _ interface {
-	DateLike
-	fmt.Stringer
-	encoding.TextMarshaler
-	encoding.TextUnmarshaler
-} = (*QuarterDate)(nil)
-
 // String returns the ISO8601 string representation of the format "YYYY-QX-DD".
 // For example: "2012-Q4-85".
 func (q QuarterDate) String() string {
@@ -657,13 +642,6 @@ type WeekDate struct {
 	Week int
 	Day  int
 }
-
-var _ interface {
-	DateLike
-	fmt.Stringer
-	encoding.TextMarshaler
-	encoding.TextUnmarshaler
-} = (*WeekDate)(nil)
 
 // String returns the ISO8601 string representation of the format "YYYY-WX-DD".
 // For example: "2012-W52-1".
@@ -760,13 +738,6 @@ type OrdinalDate struct {
 	Year int
 	Day  int
 }
-
-var _ interface {
-	DateLike
-	fmt.Stringer
-	encoding.TextMarshaler
-	encoding.TextUnmarshaler
-} = (*OrdinalDate)(nil)
 
 // String returns the ISO8601 string representation of the format "YYYY-DDD".
 // For example: "2012-359".
