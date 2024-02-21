@@ -204,3 +204,9 @@ func TestParseISO(t *testing.T) {
 
 	})
 }
+
+func FuzzParseISO(f *testing.F) {
+	f.Fuzz(func(t *testing.T, str string) {
+		_, _ = synchro.ParseISO[tz.UTC](str)
+	})
+}
