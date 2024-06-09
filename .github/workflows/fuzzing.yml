@@ -1,0 +1,29 @@
+name: fuzzing
+on:
+  push:
+    branches:
+      - "main"
+    tags:
+      - "v*.*.*"
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+
+jobs:
+  fuzzing:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        go:
+        - '^1.20'
+        - '^1.21'
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ matrix.go }}
+      - name: Fuzzing synchro package
+        run: go test . -fuzz=Fuzz -fuzztime=300s
