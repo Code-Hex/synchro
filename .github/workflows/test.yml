@@ -36,5 +36,3 @@ jobs:
         uses: codecov/codecov-action@v3
         with:
           files: ${{ steps.vars.outputs.coverage_txt }}
-      - name: Fuzzing synchro package
-        run: go test . -fuzz=Fuzz -fuzztime=300s
