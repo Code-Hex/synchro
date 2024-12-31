@@ -35,6 +35,7 @@ jobs:
         run: go test ./... -race -coverprofile=${{ steps.vars.outputs.coverage_txt }}
       - name: Upload coverage
         if: ${{ matrix.go == '^1.23' }}
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v5
         with:
           files: ${{ steps.vars.outputs.coverage_txt }}
+          gcov_ignore: tz
