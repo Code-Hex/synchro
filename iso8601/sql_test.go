@@ -36,6 +36,11 @@ func TestDate_Scan(t *testing.T) {
 			Expected: Date{2056, 10, 31},
 		},
 		{
+			Name:  "Invalid string date",
+			Value: "abc",
+			Error: true,
+		},
+		{
 			Name:     "Valid byte slice date",
 			Value:    []byte("2157-12-31"),
 			Expected: Date{2157, 12, 31},
@@ -49,6 +54,11 @@ func TestDate_Scan(t *testing.T) {
 			Name:     "Nil value",
 			Value:    nil,
 			Expected: Date{},
+		},
+		{
+			Name:  "Invalid unknown type",
+			Value: true,
+			Error: true,
 		},
 	}
 
