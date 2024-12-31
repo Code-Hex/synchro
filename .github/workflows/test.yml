@@ -16,11 +16,13 @@ jobs:
         go:
         - '^1.20'
         - '^1.21'
+        - '^1.22'
+        - '^1.23'
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v5
         with:
           go-version: ${{ matrix.go }}
       - name: vet
@@ -32,7 +34,7 @@ jobs:
       - name: Test Coverage (pkg)
         run: go test ./... -race -coverprofile=${{ steps.vars.outputs.coverage_txt }}
       - name: Upload coverage
-        if: ${{ matrix.go == '^1.21' }}
+        if: ${{ matrix.go == '^1.23' }}
         uses: codecov/codecov-action@v3
         with:
           files: ${{ steps.vars.outputs.coverage_txt }}
