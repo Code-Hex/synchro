@@ -16,7 +16,10 @@ import (
 	"strings"
 )
 
-const tzdataURL = "https://data.iana.org/time-zones/releases/tzdata2025b.tar.gz"
+const (
+	tzVersion = "2025b"
+	tzdataURL = "https://data.iana.org/time-zones/releases/tzdata" + tzVersion + ".tar.gz"
+)
 
 func main() {
 	if err := run(context.Background()); err != nil {
