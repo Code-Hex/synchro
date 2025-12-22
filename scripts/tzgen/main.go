@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	tzVersion = "2025b"
+	tzVersion = "2025c"
 	tzdataURL = "https://data.iana.org/time-zones/releases/tzdata" + tzVersion + ".tar.gz"
 )
 
